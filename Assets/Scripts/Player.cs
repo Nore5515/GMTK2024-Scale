@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class Player : MonoBehaviour
 {
@@ -15,7 +16,14 @@ public class Player : MonoBehaviour
     GameObject swooshie;
 
     [SerializeField]
-    GameObject pivotPoint;
+    TextMeshProUGUI hpText;
+
+    int hp = 3;
+
+    public void DealDamage(int dmg)
+    {
+        hp -= dmg;
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -26,7 +34,7 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
+        hpText.text = hp.ToString();
         Vector2 movement = new Vector2();
         movement.x = Input.GetAxis("Horizontal");
         movement.y = Input.GetAxis("Vertical");
@@ -56,7 +64,6 @@ public class Player : MonoBehaviour
 
             float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
             inst.transform.rotation = Quaternion.Euler(new Vector3(0.0f, 0.0f, angle));
-            Debug.Log(angle);
         }
     }
 
