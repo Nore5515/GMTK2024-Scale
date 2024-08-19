@@ -230,7 +230,7 @@ public class Player : MonoBehaviour
             movingLeft = false;
             movingRight = false;
         }
-        movement.y = Input.GetAxis("Vertical");
+        //movement.y = Input.GetAxis("Vertical");
         transform.Translate(movement * Time.deltaTime * speed);
 
         if (Input.GetKeyDown(KeyCode.Space) && IsOnGround())
@@ -269,6 +269,7 @@ public class Player : MonoBehaviour
             float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
             inst.transform.rotation = Quaternion.Euler(new Vector3(0.0f, 0.0f, angle));
         }
+        Debug.DrawRay(transform.position + new Vector3(0.0f, -0.5f, 0.0f), -Vector3.up * 0.1f, Color.red);
     }
 
     IEnumerator PoisonCountdown()
@@ -324,7 +325,15 @@ public class Player : MonoBehaviour
 
     bool IsOnGround()
     {
-        return true;
+        RaycastHit2D hit = Physics2D.Raycast(transform.position + new Vector3(0.0f, -0.5f, 0.0f), -Vector3.up, 0.1f, LayerMask.GetMask("Default"));
+        if (hit.collider != null)
+        {
+            Debug.Log("True");
+            Debug.Log("Hit " + hit.collider.gameObject.name);
+            return true;
+        }
+        Debug.Log("False");
+        return false;
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
