@@ -17,6 +17,8 @@ public class Player : MonoBehaviour
     [SerializeField]
     GameObject liverSprite;
 
+    List<GameObject> sprites = new();
+
     [SerializeField]
     float speed = 1.0f;
 
@@ -43,6 +45,9 @@ public class Player : MonoBehaviour
     string activeSprite = "";
 
     bool removingPoison = false;
+
+    bool movingLeft = false;
+    bool movingRight = false;
 
     public void DealDamage(int dmg)
     {
@@ -117,6 +122,21 @@ public class Player : MonoBehaviour
         heartSprite.SetActive(false);
     }
 
+    void FlipSpritesAround()
+    {
+        foreach (GameObject sprite in sprites)
+        {
+            if (movingLeft)
+            {
+                sprite.GetComponent<SpriteRenderer>().flipX = true;
+            }
+            else
+            {
+                sprite.GetComponent<SpriteRenderer>().flipX = false;
+            }
+        }
+    }
+
     void ToggleRegen(bool regenOn)
     {
         if (regenOn)
@@ -135,6 +155,10 @@ public class Player : MonoBehaviour
     void Start()
     {
         SwitchSprite("normal");
+
+        sprites.Add(normalSprite);
+        sprites.Add(liverSprite);
+        sprites.Add(heartSprite);
     }
 
     float shakeRadius = 0.0f;
@@ -166,6 +190,23 @@ public class Player : MonoBehaviour
         hpText.text = hp.ToString();
         Vector2 movement = new Vector2();
         movement.x = Input.GetAxis("Horizontal");
+        if (movement.x > 0)
+        {
+            movingRight = true;
+            movingLeft = false;
+            FlipSpritesAround();
+        }
+        else if (movement.x < 0)
+        {
+            movingLeft = true;
+            movingRight = false;
+            FlipSpritesAround();
+        }
+        else
+        {
+            movingLeft = false;
+            movingRight = false;
+        }
         movement.y = Input.GetAxis("Vertical");
         transform.Translate(movement * Time.deltaTime * speed);
 
