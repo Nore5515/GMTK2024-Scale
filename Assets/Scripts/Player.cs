@@ -262,4 +262,18 @@ public class Player : MonoBehaviour
     {
         return true;
     }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        //Debug.Log("Player trigger entered with " + collision.gameObject.name);
+        if (collision.gameObject.tag == "poison_giver")
+        {
+            GetPoisonedIdiot();
+        }
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        //Debug.Log("Player collision entered with " + collision.gameObject.name);
+    }
 }
