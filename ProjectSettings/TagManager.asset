@@ -8,6 +8,7 @@ TagManager:
   - swooshie
   - player
   - poison_giver
+  - poison_remover
   layers:
   - Default
   - TransparentFX

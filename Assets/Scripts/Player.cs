@@ -61,6 +61,10 @@ public class Player : MonoBehaviour
     {
         Debug.Log("Get poison!");
 
+        if (activeSprite == "liver")
+        {
+            return;
+        }
         poisonAnim.SetActive(true);
         removingPoison = false;
         GameState.IsPoisoned = true;
@@ -310,6 +314,10 @@ public class Player : MonoBehaviour
         if (collision.gameObject.tag == "poison_giver")
         {
             GetPoisonedIdiot();
+        }
+        else if (collision.gameObject.tag == "poison_remover")
+        {
+            StopPoison();
         }
     }
 
