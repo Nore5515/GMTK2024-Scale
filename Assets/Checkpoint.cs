@@ -52,6 +52,7 @@ public class Checkpoint : MonoBehaviour
         if (collision.gameObject.tag == "player")
         {
             IgniteCheckpoint();
+            collision.gameObject.GetComponent<Player>().AssignCheckpoint(this.gameObject);
         }
     }
 

@@ -49,12 +49,26 @@ public class Player : MonoBehaviour
     bool movingLeft = false;
     bool movingRight = false;
 
+    GameObject checkpoint;
+
     public void DealDamage(int dmg)
     {
         shakeRadius += 0.5f;
         hp -= dmg;
         GameState.hp = hp;
         hpChanged.Invoke();
+        if (hp <= 0)
+        {
+            if (checkpoint is not null)
+            {
+                gameObject.transform.position = checkpoint.transform.position;
+                Heal(GameState.maxHP);
+            }
+        }
+        else
+        {
+            // Reload scene!
+        }
     }
 
     public void GetPoisonedIdiot()
@@ -85,6 +99,11 @@ public class Player : MonoBehaviour
 
         StopCoroutine("PoisonCountdown");
         StartCoroutine("FadeoutPoison");
+    }
+
+    public void AssignCheckpoint(GameObject g)
+    {
+        checkpoint = g;
     }
 
     void SwitchSprite(string newSprite)
