@@ -59,7 +59,7 @@ public class Player : MonoBehaviour
 
     public void GetPoisonedIdiot()
     {
-        Debug.Log("Get poison!");
+        //Debug.Log("Get poison!");
 
         if (activeSprite == "liver")
         {
@@ -79,7 +79,7 @@ public class Player : MonoBehaviour
 
     public void StopPoison()
     {
-        Debug.Log("Stopping poison!");
+        //Debug.Log("Stopping poison!");
 
         GameState.IsPoisoned = false;
 
@@ -111,7 +111,7 @@ public class Player : MonoBehaviour
 
         if (switchedOffLiver && removingPoison)
         {
-            Debug.Log("Tried to sneak off poison ehh?");
+            //Debug.Log("Tried to sneak off poison ehh?");
             GetPoisonedIdiot();
         }
 
@@ -255,7 +255,7 @@ public class Player : MonoBehaviour
     IEnumerator PoisonCountdown()
     {
         WaitForSeconds wait = new WaitForSeconds(2f);
-        Debug.Log("Poison Countdown initiated!");
+        //Debug.Log("Poison Countdown initiated!");
 
         while (true)
         {
@@ -266,7 +266,7 @@ public class Player : MonoBehaviour
 
     IEnumerator FadeoutPoison()
     {
-        Debug.Log("Fadeout Poison");
+        //Debug.Log("Fadeout Poison");
 
         WaitForSeconds wait = new WaitForSeconds(0.15f);
         removingPoison = true;
@@ -282,7 +282,7 @@ public class Player : MonoBehaviour
         poisonAnim.SetActive(false);
         removingPoison = false;
 
-        Debug.Log("Fadeout Poison Complete! Free to go!");
+        //Debug.Log("Fadeout Poison Complete! Free to go!");
     }
 
     IEnumerator HealWait()
