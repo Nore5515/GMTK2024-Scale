@@ -36,11 +36,9 @@ public class Checkpoint : MonoBehaviour
         {
             if (igniteTorch.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).normalizedTime > 1.0f)
             {
-                Debug.Log("WOO");
             }
             else
             {
-                Debug.Log("BOO");
                 igniteTorch.SetActive(false);
                 litTorch.SetActive(true);
             }

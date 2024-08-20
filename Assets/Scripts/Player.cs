@@ -337,7 +337,7 @@ public class Player : MonoBehaviour
         }
     }
 
-    void Heal(int x)
+    public void Heal(int x)
     {
         if (hp + x > GameState.maxHP)
         {
@@ -371,6 +371,11 @@ public class Player : MonoBehaviour
         else if (collision.gameObject.tag == "poison_remover")
         {
             StopPoison();
+        }
+        else if (collision.gameObject.tag == "health_pickup")
+        {
+            Heal(1);
+            Destroy(collision.gameObject);
         }
     }
 

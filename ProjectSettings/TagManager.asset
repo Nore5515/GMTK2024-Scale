@@ -9,6 +9,7 @@ TagManager:
   - player
   - poison_giver
   - poison_remover
+  - heart_pickup
   layers:
   - Default
   - TransparentFX
