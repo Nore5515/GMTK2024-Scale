@@ -17,6 +17,9 @@ public class Player : MonoBehaviour
     [SerializeField]
     GameObject liverSprite;
 
+    [SerializeField]
+    GameObject legsSprite;
+
     List<GameObject> sprites = new();
 
     [SerializeField]
@@ -127,6 +130,10 @@ public class Player : MonoBehaviour
             heartSprite.SetActive(true);
             regenOn = true;
         }
+        else if (newSprite == "legs")
+        {
+            legsSprite.SetActive(true);
+        }
 
         if (switchedOffLiver && removingPoison)
         {
@@ -143,6 +150,7 @@ public class Player : MonoBehaviour
         normalSprite.SetActive(false);
         liverSprite.SetActive(false);
         heartSprite.SetActive(false);
+        legsSprite.SetActive(false);
     }
 
     void FlipSpritesAround()
@@ -182,6 +190,7 @@ public class Player : MonoBehaviour
         sprites.Add(normalSprite);
         sprites.Add(liverSprite);
         sprites.Add(heartSprite);
+        sprites.Add(legsSprite);
     }
 
     float shakeRadius = 0.0f;
@@ -236,7 +245,15 @@ public class Player : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space) && IsOnGround())
         {
             Vector2 jumpVelo = GetComponent<Rigidbody2D>().velocity;
-            jumpVelo.y = jumpStrength;
+            if (activeSprite == "legs")
+            {
+                jumpVelo.y = jumpStrength * 1.5f;
+            }
+            else
+            {
+                jumpVelo.y = jumpStrength;
+            }
+
             GetComponent<Rigidbody2D>().velocity = jumpVelo;
         }
 
@@ -251,6 +268,10 @@ public class Player : MonoBehaviour
         else if (Input.GetKeyDown(KeyCode.Alpha3))
         {
             SwitchSprite("heart");
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha4))
+        {
+            SwitchSprite("legs");
         }
 
 
@@ -318,7 +339,14 @@ public class Player : MonoBehaviour
 
     void Heal(int x)
     {
-        hp += x;
+        if (hp + x > GameState.maxHP)
+        {
+            hp = GameState.maxHP;
+        }
+        else
+        {
+            hp += x;
+        }
         GameState.hp = hp;
         hpChanged.Invoke();
     }
@@ -328,11 +356,8 @@ public class Player : MonoBehaviour
         RaycastHit2D hit = Physics2D.Raycast(transform.position + new Vector3(0.0f, -0.5f, 0.0f), -Vector3.up, 0.1f, LayerMask.GetMask("Default"));
         if (hit.collider != null)
         {
-            Debug.Log("True");
-            Debug.Log("Hit " + hit.collider.gameObject.name);
             return true;
         }
-        Debug.Log("False");
         return false;
     }
 
