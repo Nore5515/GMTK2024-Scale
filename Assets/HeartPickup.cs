@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class HeartPickup : MonoBehaviour
 {
+    [SerializeField]
+    bool maxHP = false;
 
     // Start is called before the first frame update
     void Start()
@@ -21,7 +23,13 @@ public class HeartPickup : MonoBehaviour
     {
         if (collision.gameObject.tag == "player")
         {
-            if (GameState.hp < GameState.maxHP)
+            if (maxHP)
+            {
+                GameState.maxHP++;
+                collision.gameObject.GetComponent<Player>().Heal(GameState.maxHP);
+                Destroy(gameObject);
+            }
+            else if (GameState.hp < GameState.maxHP)
             {
                 collision.gameObject.GetComponent<Player>().Heal(1);
                 Destroy(gameObject);

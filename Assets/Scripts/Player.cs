@@ -54,6 +54,8 @@ public class Player : MonoBehaviour
 
     GameObject checkpoint;
 
+    bool poisonTimerRunning = false;
+
     public void DealDamage(int dmg)
     {
         shakeRadius += 0.5f;
@@ -65,6 +67,7 @@ public class Player : MonoBehaviour
             if (checkpoint is not null)
             {
                 gameObject.transform.position = checkpoint.transform.position;
+                StopPoison();
                 Heal(GameState.maxHP);
             }
         }
@@ -90,12 +93,16 @@ public class Player : MonoBehaviour
         c.a = 1.0f;
         poisonAnim.GetComponent<Image>().color = c;
 
-        StartCoroutine("PoisonCountdown");
+        if (!poisonTimerRunning)
+        {
+            StartCoroutine("PoisonCountdown");
+        }
         StopCoroutine("FadeoutPoison");
     }
 
     public void StopPoison()
     {
+        poisonTimerRunning = false;
         //Debug.Log("Stopping poison!");
 
         GameState.IsPoisoned = false;
@@ -202,13 +209,13 @@ public class Player : MonoBehaviour
         {
             Vector2 playerPos = new Vector2(transform.position.x, transform.position.y);
             Vector2 randomPos = Random.insideUnitCircle * shakeRadius + playerPos;
-            Vector3 newCameraPos = new Vector3(randomPos.x, randomPos.y, -10.0f);
+            Vector3 newCameraPos = new Vector3(randomPos.x, randomPos.y + 1.5f, -10.0f);
             Camera.main.transform.position = newCameraPos;
             shakeRadius -= Time.deltaTime * 2.0f;
         }
         else
         {
-            Camera.main.transform.position = new Vector3(transform.position.x, transform.position.y, -10.0f);
+            Camera.main.transform.position = new Vector3(transform.position.x, transform.position.y + 1.5f, -10.0f);
         }
         if (Input.GetKeyDown(KeyCode.Q))
         {
@@ -240,7 +247,14 @@ public class Player : MonoBehaviour
             movingRight = false;
         }
         //movement.y = Input.GetAxis("Vertical");
-        transform.Translate(movement * Time.deltaTime * speed);
+        if (activeSprite == "liver" || activeSprite == "heart")
+        {
+            transform.Translate(movement * Time.deltaTime * speed * 0.5f);
+        }
+        else
+        {
+            transform.Translate(movement * Time.deltaTime * speed);
+        }
 
         if (Input.GetKeyDown(KeyCode.Space) && IsOnGround())
         {
@@ -263,15 +277,24 @@ public class Player : MonoBehaviour
         }
         else if (Input.GetKeyDown(KeyCode.Alpha2))
         {
-            SwitchSprite("liver");
+            if (GameState.CheckForm("liver"))
+            {
+                SwitchSprite("liver");
+            }
         }
         else if (Input.GetKeyDown(KeyCode.Alpha3))
         {
-            SwitchSprite("heart");
+            if (GameState.CheckForm("heart"))
+            {
+                SwitchSprite("heart");
+            }
         }
         else if (Input.GetKeyDown(KeyCode.Alpha4))
         {
-            SwitchSprite("legs");
+            if (GameState.CheckForm("legs"))
+            {
+                SwitchSprite("legs");
+            }
         }
 
 
@@ -297,6 +320,8 @@ public class Player : MonoBehaviour
     {
         WaitForSeconds wait = new WaitForSeconds(2f);
         //Debug.Log("Poison Countdown initiated!");
+
+        poisonTimerRunning = true;
 
         while (true)
         {
@@ -376,6 +401,10 @@ public class Player : MonoBehaviour
         {
             Heal(1);
             Destroy(collision.gameObject);
+        }
+        else if (collision.gameObject.tag == "killbox")
+        {
+            DealDamage(GameState.maxHP);
         }
     }
 

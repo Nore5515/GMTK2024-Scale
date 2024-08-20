@@ -10,6 +10,9 @@ TagManager:
   - poison_giver
   - poison_remover
   - heart_pickup
+  - ability_unlocker
+  - killbox
+  - max_heart_pickup
   layers:
   - Default
   - TransparentFX
@@ -44,6 +47,9 @@ TagManager:
   - 
   - 
   m_SortingLayers:
+  - name: TileBG
+    uniqueID: 2507337031
+    locked: 0
   - name: TileFG
     uniqueID: 2774399801
     locked: 0
@@ -52,4 +58,7 @@ TagManager:
     locked: 0
   - name: Player
     uniqueID: 2052241331
+    locked: 0
+  - name: Darkness
+    uniqueID: 2018165165
     locked: 0
