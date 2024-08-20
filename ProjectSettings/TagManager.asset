@@ -59,6 +59,9 @@ TagManager:
   - name: Player
     uniqueID: 2052241331
     locked: 0
+  - name: Poof
+    uniqueID: 368410757
+    locked: 0
   - name: Darkness
     uniqueID: 2018165165
     locked: 0

@@ -40,6 +40,9 @@ public class Player : MonoBehaviour
     [SerializeField]
     GameObject poisonAnim;
 
+    [SerializeField]
+    GameObject poofAnim;
+
     [Header("HP Changed (healed or damaged)!")]
     public UnityEvent hpChanged;
 
@@ -55,6 +58,8 @@ public class Player : MonoBehaviour
     GameObject checkpoint;
 
     bool poisonTimerRunning = false;
+
+    bool poofing = false;
 
     public void DealDamage(int dmg)
     {
@@ -120,6 +125,9 @@ public class Player : MonoBehaviour
     {
         bool regenOn = false;
         bool switchedOffLiver = true;
+        poofAnim.SetActive(true);
+        poofAnim.GetComponent<Animator>().Play("Poof", -1, 0.0f);
+        poofing = true;
 
         DisableAllSprites();
         if (newSprite == "normal")
@@ -194,6 +202,8 @@ public class Player : MonoBehaviour
     {
         SwitchSprite("normal");
 
+        poofAnim.SetActive(false);
+
         sprites.Add(normalSprite);
         sprites.Add(liverSprite);
         sprites.Add(heartSprite);
@@ -205,6 +215,20 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (poofing)
+        {
+            if (poofAnim.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).normalizedTime <= 1.0f)
+            {
+                Debug.Log("under 1");
+            }
+            else
+            {
+                Debug.Log("over 1");
+                poofAnim.SetActive(false);
+                poofing = false;
+            }
+        }
+
         if (shakeRadius > 0.0f)
         {
             Vector2 playerPos = new Vector2(transform.position.x, transform.position.y);
@@ -398,6 +422,11 @@ public class Player : MonoBehaviour
             StopPoison();
         }
         else if (collision.gameObject.tag == "health_pickup")
+        {
+            Heal(1);
+            Destroy(collision.gameObject);
+        }
+        else if (collision.gameObject.tag == "max_health_pickup")
         {
             Heal(1);
             Destroy(collision.gameObject);
