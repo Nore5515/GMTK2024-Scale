@@ -219,11 +219,11 @@ public class Player : MonoBehaviour
         {
             if (poofAnim.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).normalizedTime <= 1.0f)
             {
-                Debug.Log("under 1");
+                //Debug.Log("under 1");
             }
             else
             {
-                Debug.Log("over 1");
+                //Debug.Log("over 1");
                 poofAnim.SetActive(false);
                 poofing = false;
             }
@@ -286,6 +286,10 @@ public class Player : MonoBehaviour
             if (activeSprite == "legs")
             {
                 jumpVelo.y = jumpStrength * 1.5f;
+            }
+            else if (activeSprite == "liver" || activeSprite == "heart")
+            {
+                jumpVelo.y = jumpStrength * 0.5f;
             }
             else
             {
@@ -434,6 +438,11 @@ public class Player : MonoBehaviour
         else if (collision.gameObject.tag == "killbox")
         {
             DealDamage(GameState.maxHP);
+        }
+        else if (collision.gameObject.tag == "projectile")
+        {
+            DealDamage(1);
+            Destroy(collision.gameObject);
         }
     }
 

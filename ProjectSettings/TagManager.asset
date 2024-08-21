@@ -13,6 +13,7 @@ TagManager:
   - ability_unlocker
   - killbox
   - max_heart_pickup
+  - projectile
   layers:
   - Default
   - TransparentFX

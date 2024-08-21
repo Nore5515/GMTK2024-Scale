@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: f51eb33a034114039986941d3fbcf3de
+guid: bed8603edf93a405ebe4faf13de4fb8d
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -136,7 +136,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: headtoobig-Sheet_0
+      name: BigBrainBullet_0
       rect:
         serializedVersion: 2
         x: 0
@@ -150,14 +150,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: e4111827545644ae880e3fcb8fa6c4f1
-      internalID: 1149844459
+      spriteID: 6c8dbc014d43f4a50921d454408db845
+      internalID: -220296034
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: headtoobig-Sheet_1
+      name: BigBrainBullet_1
       rect:
         serializedVersion: 2
         x: 32
@@ -171,8 +171,50 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: c043fa775f5ee450cb53e34eced849fd
-      internalID: 178819897
+      spriteID: ea0b967224a61422fafbb7a4ff29b6e3
+      internalID: -874301616
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BigBrainBullet_2
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6d68af4bdb328499298bf3d9a9011bd1
+      internalID: 517744395
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BigBrainBullet_3
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1a2351bec6fb44163839d6a0edeafd38
+      internalID: 1548762536
       vertices: []
       indices: 
       edges: []
@@ -188,8 +230,10 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      headtoobig-Sheet_0: 1149844459
-      headtoobig-Sheet_1: 178819897
+      BigBrainBullet_0: -220296034
+      BigBrainBullet_1: -874301616
+      BigBrainBullet_2: 517744395
+      BigBrainBullet_3: 1548762536
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
