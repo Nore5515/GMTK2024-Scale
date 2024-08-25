@@ -46,6 +46,9 @@ public class Player : MonoBehaviour
     [Header("HP Changed (healed or damaged)!")]
     public UnityEvent hpChanged;
 
+    [Header("Respawning at checkpoint!")]
+    public UnityEvent respawn;
+
     int hp = 3;
 
     string activeSprite = "";
@@ -72,6 +75,7 @@ public class Player : MonoBehaviour
             if (checkpoint is not null)
             {
                 gameObject.transform.position = checkpoint.transform.position;
+                respawn.Invoke();
                 StopPoison();
                 Heal(GameState.maxHP);
             }
@@ -208,6 +212,13 @@ public class Player : MonoBehaviour
         sprites.Add(liverSprite);
         sprites.Add(heartSprite);
         sprites.Add(legsSprite);
+
+        GameObject[] enemies = GameObject.FindGameObjectsWithTag("enemy");
+        foreach (GameObject enemy in enemies)
+        {
+            Debug.Log("Enemy " + enemy.gameObject.name);
+            respawn.AddListener(enemy.GetComponent<Enemy>().ResetEnemy);
+        }
     }
 
     float shakeRadius = 0.0f;

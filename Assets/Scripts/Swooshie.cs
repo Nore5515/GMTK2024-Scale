@@ -17,4 +17,14 @@ public class Swooshie : MonoBehaviour
         yield return new WaitForSeconds(0.1f);
         Destroy(gameObject);
     }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        Debug.Log("Swooshie trigger entered with " + collision.gameObject.name);
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        Debug.Log("Swooshie collision entered with " + collision.gameObject.name);
+    }
 }

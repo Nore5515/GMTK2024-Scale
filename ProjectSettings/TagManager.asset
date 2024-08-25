@@ -21,8 +21,8 @@ TagManager:
   - Player
   - Water
   - UI
-  - 
-  - 
+  - PlayerDetect
+  - SwooshieDetect
   - 
   - 
   - 
@@ -65,4 +65,7 @@ TagManager:
     locked: 0
   - name: Darkness
     uniqueID: 2018165165
+    locked: 0
+  - name: Waterfall
+    uniqueID: 3206770619
     locked: 0

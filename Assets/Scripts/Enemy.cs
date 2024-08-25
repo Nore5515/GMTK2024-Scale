@@ -21,10 +21,18 @@ public class Enemy : MonoBehaviour
     [SerializeField]
     GameObject bulletPrefab;
 
+    Vector3 startPoint;
+
     // Start is called before the first frame update
     void Start()
     {
+        startPoint = transform.position;
+    }
 
+    public void ResetEnemy()
+    {
+        transform.position = startPoint;
+        gameObject.SetActive(true);
     }
 
     void FlipLeft()
@@ -108,16 +116,19 @@ public class Enemy : MonoBehaviour
     void FireAtPlayer(GameObject player)
     {
         GameObject inst = Instantiate(bulletPrefab);
-
-
+        inst.transform.position = this.transform.position;
+        Vector3 dist = player.transform.position - transform.position;
+        dist.Normalize();
+        inst.GetComponent<Projectile>().dir = dist;
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        Debug.Log("Enemy trigger entered with " + collision.gameObject.name);
+        //Debug.Log("Enemy trigger entered with " + collision.gameObject.name);
         if (collision.gameObject.tag == "swooshie")
         {
-            Destroy(gameObject);
+            gameObject.SetActive(false);
+            //Destroy(gameObject);
         }
         else if (collision.gameObject.tag == "player" && isBigBrain)
         {
@@ -127,7 +138,7 @@ public class Enemy : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        Debug.Log("Enemy collision entered with " + collision.gameObject.name);
+        //Debug.Log("Enemy collision entered with " + collision.gameObject.name);
         if (collision.gameObject.tag == "player")
         {
             collision.gameObject.GetComponent<Player>().DealDamage(1);
