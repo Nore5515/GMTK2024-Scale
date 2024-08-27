@@ -5,22 +5,53 @@ using TMPro;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
+struct SpriteSet
+{
+    public SpriteSet(GameObject walk, GameObject idle)
+    {
+        this.walk = walk;
+        this.idle = idle;
+    }
+
+    public GameObject walk { get; }
+    public GameObject idle { get; }
+}
+
+public enum MorphTypes
+{
+    normal,
+    liver,
+    legs,
+    eyes,
+    heart
+}
+
 public class Player : MonoBehaviour
 {
 
     [SerializeField]
-    GameObject normalSprite;
+    GameObject normalSprite_idle;
+
+    [SerializeField]
+    GameObject normalSprite_walk;
+
+    SpriteSet normalSprites;
 
     [SerializeField]
     GameObject heartSprite;
 
     [SerializeField]
-    GameObject liverSprite;
+    GameObject liverSprite_idle;
+
+    [SerializeField]
+    GameObject liverSprite_walk;
+
+    SpriteSet liverSprites;
 
     [SerializeField]
     GameObject legsSprite;
 
-    List<GameObject> sprites = new();
+    public List<GameObject> sprites = new();
 
     [SerializeField]
     float speed = 1.0f;
@@ -51,6 +82,8 @@ public class Player : MonoBehaviour
 
     int hp = 3;
 
+    float shakeRadius = 0.0f;
+
     string activeSprite = "";
 
     bool removingPoison = false;
@@ -58,11 +91,114 @@ public class Player : MonoBehaviour
     bool movingLeft = false;
     bool movingRight = false;
 
+    bool moving = false;
+
     GameObject checkpoint;
 
     bool poisonTimerRunning = false;
 
     bool poofing = false;
+
+    void Start()
+    {
+        normalSprites = new SpriteSet(normalSprite_walk, normalSprite_idle);
+        liverSprites = new SpriteSet(liverSprite_walk, liverSprite_idle);
+
+        FillSprites();
+
+        SwitchSprite("normal");
+
+        poofAnim.SetActive(false);
+
+        GameObject[] enemies = GameObject.FindGameObjectsWithTag("enemy");
+        foreach (GameObject enemy in enemies)
+        {
+            Debug.Log("Enemy " + enemy.gameObject.name);
+            respawn.AddListener(enemy.GetComponent<Enemy>().ResetEnemy);
+        }
+    }
+
+    void FillSprites()
+    {
+        for (int x = 0; x < transform.childCount; x++)
+        {
+            if (transform.GetChild(x).gameObject.tag == "sprite")
+            {
+                sprites.Add(transform.GetChild(x).gameObject);
+            }
+        }
+    }
+
+    void SwitchSprite(string newSprite)
+    {
+        bool regenOn = false;
+        bool switchedOffLiver = true;
+        poofAnim.SetActive(true);
+        poofAnim.GetComponent<Animator>().Play("Poof", -1, 0.0f);
+        poofing = true;
+
+        DisableAllSprites();
+        if (GetSpriteSetByName(newSprite) != null)
+        {
+            SpriteSet spritesheet = (SpriteSet)GetSpriteSetByName(newSprite);
+            if (moving)
+            {
+                spritesheet.walk.SetActive(true);
+            }
+            else
+            {
+                spritesheet.idle.SetActive(true);
+            }
+        }
+        else
+        {
+            if (newSprite == "heart")
+            {
+                heartSprite.SetActive(true);
+                regenOn = true;
+            }
+            else if (newSprite == "legs")
+            {
+                legsSprite.SetActive(true);
+            }
+        }
+
+        if (newSprite == "liver")
+        {
+            switchedOffLiver = false;
+            StopPoison();
+        }
+
+        if (switchedOffLiver && removingPoison)
+        {
+            //Debug.Log("Tried to sneak off poison ehh?");
+            GetPoisonedIdiot();
+        }
+
+        ToggleRegen(regenOn);
+        activeSprite = newSprite;
+    }
+
+    void DisableAllSprites()
+    {
+        foreach (GameObject g in sprites)
+        {
+            g.SetActive(false);
+        }
+    }
+
+    SpriteSet? GetSpriteSetByName(string name)
+    {
+        if (name == "normal")
+        {
+            return normalSprites;
+        }
+        if (name == "liver")
+        {
+            return liverSprites;
+        }
+        return null;
+    }
 
     public void DealDamage(int dmg)
     {
@@ -88,8 +224,6 @@ public class Player : MonoBehaviour
 
     public void GetPoisonedIdiot()
     {
-        //Debug.Log("Get poison!");
-
         if (activeSprite == "liver")
         {
             return;
@@ -112,7 +246,6 @@ public class Player : MonoBehaviour
     public void StopPoison()
     {
         poisonTimerRunning = false;
-        //Debug.Log("Stopping poison!");
 
         GameState.IsPoisoned = false;
 
@@ -123,53 +256,6 @@ public class Player : MonoBehaviour
     public void AssignCheckpoint(GameObject g)
     {
         checkpoint = g;
-    }
-
-    void SwitchSprite(string newSprite)
-    {
-        bool regenOn = false;
-        bool switchedOffLiver = true;
-        poofAnim.SetActive(true);
-        poofAnim.GetComponent<Animator>().Play("Poof", -1, 0.0f);
-        poofing = true;
-
-        DisableAllSprites();
-        if (newSprite == "normal")
-        {
-            normalSprite.SetActive(true);
-        }
-        else if (newSprite == "liver")
-        {
-            liverSprite.SetActive(true);
-            switchedOffLiver = false;
-            StopPoison();
-        }
-        else if (newSprite == "heart")
-        {
-            heartSprite.SetActive(true);
-            regenOn = true;
-        }
-        else if (newSprite == "legs")
-        {
-            legsSprite.SetActive(true);
-        }
-
-        if (switchedOffLiver && removingPoison)
-        {
-            //Debug.Log("Tried to sneak off poison ehh?");
-            GetPoisonedIdiot();
-        }
-
-        ToggleRegen(regenOn);
-        activeSprite = newSprite;
-    }
-
-    void DisableAllSprites()
-    {
-        normalSprite.SetActive(false);
-        liverSprite.SetActive(false);
-        heartSprite.SetActive(false);
-        legsSprite.SetActive(false);
     }
 
     void FlipSpritesAround()
@@ -201,27 +287,8 @@ public class Player : MonoBehaviour
         }
     }
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        SwitchSprite("normal");
 
-        poofAnim.SetActive(false);
 
-        sprites.Add(normalSprite);
-        sprites.Add(liverSprite);
-        sprites.Add(heartSprite);
-        sprites.Add(legsSprite);
-
-        GameObject[] enemies = GameObject.FindGameObjectsWithTag("enemy");
-        foreach (GameObject enemy in enemies)
-        {
-            Debug.Log("Enemy " + enemy.gameObject.name);
-            respawn.AddListener(enemy.GetComponent<Enemy>().ResetEnemy);
-        }
-    }
-
-    float shakeRadius = 0.0f;
 
     // Update is called once per frame
     void Update()
@@ -266,21 +333,29 @@ public class Player : MonoBehaviour
         movement.x = Input.GetAxis("Horizontal");
         if (movement.x > 0)
         {
+            moving = true;
             movingRight = true;
             movingLeft = false;
             FlipSpritesAround();
+            //SwitchSprite("normal");
         }
         else if (movement.x < 0)
         {
+            moving = true;
             movingLeft = true;
             movingRight = false;
             FlipSpritesAround();
+            //SwitchSprite("normal");
         }
         else
         {
+            moving = false;
             movingLeft = false;
             movingRight = false;
         }
+
+        HandleAnimStateSwitching();
+
         //movement.y = Input.GetAxis("Vertical");
         if (activeSprite == "liver" || activeSprite == "heart")
         {
@@ -310,6 +385,46 @@ public class Player : MonoBehaviour
             GetComponent<Rigidbody2D>().velocity = jumpVelo;
         }
 
+        HandleMorphInput();
+
+        if (Input.GetMouseButtonDown(0))
+        {
+            Vector3 cursorPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            cursorPosition.z = 0;
+
+            GameObject inst = Instantiate(swooshie);
+            inst.transform.position = transform.position;
+            Vector3 direction = cursorPosition - transform.position;
+
+            direction.Normalize();
+            inst.transform.position += direction;
+
+            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+            inst.transform.rotation = Quaternion.Euler(new Vector3(0.0f, 0.0f, angle));
+        }
+        Debug.DrawRay(transform.position + new Vector3(0.0f, -0.5f, 0.0f), -Vector3.up * 0.1f, Color.red);
+    }
+
+    void HandleAnimStateSwitching()
+    {
+        if (GetSpriteSetByName(activeSprite) != null)
+        {
+            SpriteSet spritesheet = (SpriteSet)GetSpriteSetByName(activeSprite);
+            if (moving)
+            {
+                spritesheet.walk.SetActive(true);
+                spritesheet.idle.SetActive(false);
+            }
+            else
+            {
+                spritesheet.idle.SetActive(true);
+                spritesheet.walk.SetActive(false);
+            }
+        }
+    }
+
+    void HandleMorphInput()
+    {
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
             SwitchSprite("normal");
@@ -335,24 +450,6 @@ public class Player : MonoBehaviour
                 SwitchSprite("legs");
             }
         }
-
-
-        if (Input.GetMouseButtonDown(0))
-        {
-            Vector3 cursorPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            cursorPosition.z = 0;
-
-            GameObject inst = Instantiate(swooshie);
-            inst.transform.position = transform.position;
-            Vector3 direction = cursorPosition - transform.position;
-
-            direction.Normalize();
-            inst.transform.position += direction;
-
-            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-            inst.transform.rotation = Quaternion.Euler(new Vector3(0.0f, 0.0f, angle));
-        }
-        Debug.DrawRay(transform.position + new Vector3(0.0f, -0.5f, 0.0f), -Vector3.up * 0.1f, Color.red);
     }
 
     IEnumerator PoisonCountdown()

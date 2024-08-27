@@ -14,6 +14,7 @@ TagManager:
   - killbox
   - max_heart_pickup
   - projectile
+  - sprite
   layers:
   - Default
   - TransparentFX

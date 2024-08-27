@@ -121,14 +121,14 @@ ScriptedImporter:
   animatedSpriteImportData:
   - name: Player_liver
     originalName: 
-    pivot: {x: 0.5, y: 0}
+    pivot: {x: 0.516129, y: 0}
     alignment: 9
     border: {x: 0, y: 0, z: 0, w: 0}
     rect:
       serializedVersion: 2
       x: 4
       y: 4
-      width: 30
+      width: 31
       height: 32
     spriteID: 6e022258ea938445e9a4d6b154e60ad5
     spriteBone: []
@@ -139,6 +139,46 @@ ScriptedImporter:
     edges: []
     tessellationDetail: 0
     uvTransform: {x: 4, y: 4}
+  - name: Player_liver_Frame_1
+    originalName: 
+    pivot: {x: 0.5, y: 0}
+    alignment: 9
+    border: {x: 0, y: 0, z: 0, w: 0}
+    rect:
+      serializedVersion: 2
+      x: 4
+      y: 44
+      width: 30
+      height: 32
+    spriteID: 3287ba347dbff476dbdcb767e1b922ca
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 4, y: 44}
+  - name: Player_liver_Frame_2
+    originalName: 
+    pivot: {x: 0.4827586, y: 0}
+    alignment: 9
+    border: {x: 0, y: 0, z: 0, w: 0}
+    rect:
+      serializedVersion: 2
+      x: 4
+      y: 84
+      width: 29
+      height: 32
+    spriteID: a1c522e77ccf54a9b9d91f547574224d
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 4, y: 84}
   spriteSheetImportData: []
   asepriteLayers:
   - layerIndex: 0
@@ -148,14 +188,30 @@ ScriptedImporter:
     layerType: 0
     blendMode: 0
     cells:
-    - name: Player_liver
+    - name: Player_liver_Frame_0
       frameIndex: 0
+      cellRect:
+        x: 0
+        y: 0
+        width: 31
+        height: 32
+      spriteId: 6e022258ea938445e9a4d6b154e60ad5
+    - name: Player_liver_Frame_1
+      frameIndex: 1
       cellRect:
         x: 1
         y: 0
         width: 30
         height: 32
-      spriteId: 6e022258ea938445e9a4d6b154e60ad5
+      spriteId: 3287ba347dbff476dbdcb767e1b922ca
+    - name: Player_liver_Frame_2
+      frameIndex: 2
+      cellRect:
+        x: 2
+        y: 0
+        width: 29
+        height: 32
+      spriteId: a1c522e77ccf54a9b9d91f547574224d
     linkedCells: []
     parentIndex: -1
   platformSettings: []
