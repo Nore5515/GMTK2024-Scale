@@ -4,6 +4,7 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.Events;
 using UnityEngine.UI;
+using System.Threading.Tasks;
 
 struct SpriteSet
 {
@@ -88,8 +89,8 @@ public class Player : MonoBehaviour
 
     bool removingPoison = false;
 
-    bool movingLeft = false;
-    bool movingRight = false;
+    public bool movingLeft = false;
+    public bool movingRight = false;
 
     bool moving = false;
 
@@ -99,8 +100,18 @@ public class Player : MonoBehaviour
 
     bool poofing = false;
 
+    async void TestLog()
+    {
+        bool stuff = await Gmtk2024_config.GetBoolValue("isDebugEnabled");
+
+        Debug.Log("Is Debug Enabled: " + stuff);
+    }
+
     void Start()
     {
+        Gmtk2024_analytics.TrackTest();
+        StartCoroutine("TestLog");
+
         normalSprites = new SpriteSet(normalSprite_walk, normalSprite_idle);
         liverSprites = new SpriteSet(liverSprite_walk, liverSprite_idle);
 
@@ -113,7 +124,7 @@ public class Player : MonoBehaviour
         GameObject[] enemies = GameObject.FindGameObjectsWithTag("enemy");
         foreach (GameObject enemy in enemies)
         {
-            Debug.Log("Enemy " + enemy.gameObject.name);
+            //Debug.Log("Enemy " + enemy.gameObject.name);
             respawn.AddListener(enemy.GetComponent<Enemy>().ResetEnemy);
         }
     }
@@ -208,6 +219,7 @@ public class Player : MonoBehaviour
         hpChanged.Invoke();
         if (hp <= 0)
         {
+            Gmtk2024_analytics.TrackPlayerDeath(activeSprite, GameState.maxHP, poisonTimerRunning, 0);
             if (checkpoint is not null)
             {
                 gameObject.transform.position = checkpoint.transform.position;

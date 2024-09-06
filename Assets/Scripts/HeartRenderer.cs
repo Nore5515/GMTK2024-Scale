@@ -33,8 +33,9 @@ public class HeartRenderer : MonoBehaviour
         {
             containers[x].GetComponent<HeartContainer>().SetFullness(true);
         }
-        for (int x = GameState.hp; x < GameState.maxHP; x++)
+        for (int x = Mathf.Max(0, GameState.hp); x < GameState.maxHP; x++)
         {
+            Debug.Log(x);
             containers[x].GetComponent<HeartContainer>().SetFullness(false);
         }
     }

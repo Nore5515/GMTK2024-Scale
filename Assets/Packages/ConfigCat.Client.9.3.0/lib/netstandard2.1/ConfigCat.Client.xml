@@ -1,0 +1,2658 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doc>
+    <assembly>
+        <name>ConfigCat.Client</name>
+    </assembly>
+    <members>
+        <member name="T:ConfigCat.Client.IConfigCatCache">
+            <summary>
+            Defines the interface used by the ConfigCat SDK to store and retrieve downloaded config data.
+            </summary>
+        </member>
+        <member name="M:ConfigCat.Client.IConfigCatCache.Set(System.String,System.String)">
+            <summary>
+            Stores a data item into the cache synchronously.
+            </summary>
+            <param name="key">A string identifying the data item.</param>
+            <param name="value">The data item to cache.</param>
+        </member>
+        <member name="M:ConfigCat.Client.IConfigCatCache.SetAsync(System.String,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Stores a data item into the cache asynchronously.
+            </summary>
+            <param name="key">A string identifying the data item.</param>
+            <param name="value">The data item to cache.</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+            <returns>A task that represents the asynchronous operation.</returns>
+        </member>
+        <member name="M:ConfigCat.Client.IConfigCatCache.Get(System.String)">
+            <summary>
+            Retrieves a data item from the cache synchronously.
+            </summary>
+            <param name="key">A string identifying the data item.</param>
+            <returns>The cached data item or <see langword="null" /> if there is none.</returns>
+        </member>
+        <member name="M:ConfigCat.Client.IConfigCatCache.GetAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Retrieves a data item from the cache asynchronously.
+            </summary>
+            <param name="key">A string identifying the data item.</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+            <returns>A task that represents the asynchronous operation. The task result contains the cached data item or <see langword="null" /> if there is none.</returns>
+        </member>
+        <member name="T:ConfigCat.Client.ConfigCatClient">
+            <summary>
+            ConfigCat SDK client.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.ConfigCatClient.LogLevel">
+            <summary>
+            Gets or sets the log level (the minimum level to use for filtering log events).
+            </summary>
+        </member>
+        <member name="M:ConfigCat.Client.ConfigCatClient.Get(System.String,System.Action{ConfigCat.Client.Configuration.ConfigCatClientOptions})">
+            <summary>
+            Returns a client object for the specified SDK Key, configured by <paramref name="configurationAction" />.
+            </summary>
+            <remarks>
+            This method returns a single, shared instance per each distinct SDK Key.
+            That is, a new client object is created only when there is none available for the specified SDK Key.
+            Otherwise, the already created and configured instance is returned (in which case <paramref name="configurationAction" /> is ignored).
+            So, please keep in mind that when you make multiple calls to this method using the same SDK Key, you may end up with multiple references to the same client object.
+            </remarks>
+            <param name="sdkKey">SDK Key to access the ConfigCat config.</param>
+            <param name="configurationAction">The action used to configure the client.</param>
+            <exception cref="T:System.ArgumentNullException">
+                <paramref name="sdkKey" /> is <see langword="null" />.</exception>
+            <exception cref="T:System.ArgumentException">
+                <paramref name="sdkKey" /> is an empty string or in an invalid format.</exception>
+        </member>
+        <member name="M:ConfigCat.Client.ConfigCatClient.Finalize" />
+        <member name="M:ConfigCat.Client.ConfigCatClient.Dispose" />
+        <member name="M:ConfigCat.Client.ConfigCatClient.DisposeAll">
+            <summary>
+            Disposes all existing <see cref="T:ConfigCat.Client.ConfigCatClient" /> instances.
+            </summary>
+            <exception cref="T:System.AggregateException">Potential exceptions thrown by <see cref="M:ConfigCat.Client.ConfigCatClient.Dispose" /> of the individual clients.</exception>
+        </member>
+        <member name="M:ConfigCat.Client.ConfigCatClient.GetValue``1(System.String,``0,ConfigCat.Client.User)">
+            <summary>
+            Returns the value of a feature flag or setting identified by <paramref name="key" /> synchronously.
+            </summary>
+            <remarks>
+            It is important to provide an argument for the <paramref name="defaultValue" /> parameter, specifically for the <typeparamref name="T" /> generic type parameter,
+            that matches the type of the feature flag or setting you are evaluating.<br />
+            Please refer to <see href="https://configcat.com/docs/sdk-reference/dotnet/#setting-type-mapping">this table</see> for the corresponding types.
+            <para>
+            Please be aware that calling this method on a thread pool thread or the main UI thread is safe only when the client is set up to use Auto or Manual Polling and in-memory caching.
+            Otherwise execution may involve I/O-bound (e.g. network) operations, because of which the executing thread may be blocked for a longer period of time. This can result in an unresponsive application.
+            In the case of problematic setups, it is recommended to use either the async version of the method or snaphots (see <see cref="M:ConfigCat.Client.IConfigCatClient.Snapshot" />).
+            </para></remarks>
+            <typeparam name="T">
+            The type of the value. Only the following types are allowed:
+            <see cref="T:System.String" />, <see cref="T:System.Boolean" />, <see cref="T:System.Int32" />, <see cref="T:System.Int64" />, <see cref="T:System.Double" /> and <see cref="T:System.Object" /> (both nullable and non-nullable).<br />
+            The type must correspond to the setting type, otherwise <paramref name="defaultValue" /> will be returned.
+            </typeparam>
+            <param name="key">Key of the feature flag or setting.</param>
+            <param name="defaultValue">In case of failure, this value will be returned.</param>
+            <param name="user">The User Object to use for evaluating targeting rules and percentage options.</param>
+            <returns>The value of the feature flag or setting.</returns>
+            <exception cref="T:System.ArgumentNullException">
+                <paramref name="key" /> is <see langword="null" />.</exception>
+            <exception cref="T:System.ArgumentException">
+                <paramref name="key" /> is an empty string.</exception>
+            <exception cref="T:System.ArgumentException">
+                <typeparamref name="T" /> is not an allowed type.</exception>
+        </member>
+        <member name="M:ConfigCat.Client.ConfigCatClient.GetValueAsync``1(System.String,``0,ConfigCat.Client.User,System.Threading.CancellationToken)">
+            <summary>
+            Returns the value of a feature flag or setting identified by <paramref name="key" /> asynchronously.
+            </summary>
+            <remarks>
+            It is important to provide an argument for the <paramref name="defaultValue" /> parameter, specifically for the <typeparamref name="T" /> generic type parameter,
+            that matches the type of the feature flag or setting you are evaluating.<br />
+            Please refer to <see href="https://configcat.com/docs/sdk-reference/dotnet/#setting-type-mapping">this table</see> for the corresponding types.
+            </remarks>
+            <typeparam name="T">
+            The type of the value. Only the following types are allowed:
+            <see cref="T:System.String" />, <see cref="T:System.Boolean" />, <see cref="T:System.Int32" />, <see cref="T:System.Int64" />, <see cref="T:System.Double" /> and <see cref="T:System.Object" /> (both nullable and non-nullable).<br />
+            The type must correspond to the setting type, otherwise <paramref name="defaultValue" /> will be returned.
+            </typeparam>
+            <param name="key">Key of the feature flag or setting.</param>
+            <param name="defaultValue">In case of failure, this value will be returned.</param>
+            <param name="user">The User Object to use for evaluating targeting rules and percentage options.</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+            <returns>A task that represents the asynchronous operation. The task result contains the value of the feature flag or setting.</returns>
+            <exception cref="T:System.ArgumentNullException">
+                <paramref name="key" /> is <see langword="null" />.</exception>
+            <exception cref="T:System.ArgumentException">
+                <paramref name="key" /> is an empty string.</exception>
+            <exception cref="T:System.ArgumentException">
+                <typeparamref name="T" /> is not an allowed type.</exception>
+            <exception cref="T:System.OperationCanceledException">
+                <paramref name="cancellationToken" /> is canceled during the execution of the task.</exception>
+        </member>
+        <member name="M:ConfigCat.Client.ConfigCatClient.GetValueDetails``1(System.String,``0,ConfigCat.Client.User)">
+            <summary>
+            Returns the value along with evaluation details of a feature flag or setting identified by <paramref name="key" /> synchronously.
+            </summary>
+            <remarks>
+            It is important to provide an argument for the <paramref name="defaultValue" /> parameter, specifically for the <typeparamref name="T" /> generic type parameter,
+            that matches the type of the feature flag or setting you are evaluating.<br />
+            Please refer to <see href="https://configcat.com/docs/sdk-reference/dotnet/#setting-type-mapping">this table</see> for the corresponding types.
+            <para>
+            Please be aware that calling this method on a thread pool thread or the main UI thread is safe only when the client is set up to use Auto or Manual Polling and in-memory caching.
+            Otherwise execution may involve I/O-bound (e.g. network) operations, because of which the executing thread may be blocked for a longer period of time. This can result in an unresponsive application.
+            In the case of problematic setups, it is recommended to use either the async version of the method or snaphots (see <see cref="M:ConfigCat.Client.IConfigCatClient.Snapshot" />).
+            </para></remarks>
+            <typeparam name="T">
+            The type of the value. Only the following types are allowed:
+            <see cref="T:System.String" />, <see cref="T:System.Boolean" />, <see cref="T:System.Int32" />, <see cref="T:System.Int64" />, <see cref="T:System.Double" /> and <see cref="T:System.Object" /> (both nullable and non-nullable).<br />
+            The type must correspond to the setting type, otherwise <paramref name="defaultValue" /> will be returned.
+            </typeparam>
+            <param name="key">Key of the feature flag or setting.</param>
+            <param name="defaultValue">In case of failure, this value will be returned.</param>
+            <param name="user">The User Object to use for evaluating targeting rules and percentage options.</param>
+            <returns>The value along with the details of evaluation of the feature flag or setting.</returns>
+            <exception cref="T:System.ArgumentNullException">
+                <paramref name="key" /> is <see langword="null" />.</exception>
+            <exception cref="T:System.ArgumentException">
+                <paramref name="key" /> is an empty string.</exception>
+            <exception cref="T:System.ArgumentException">
+                <typeparamref name="T" /> is not an allowed type.</exception>
+        </member>
+        <member name="M:ConfigCat.Client.ConfigCatClient.GetValueDetailsAsync``1(System.String,``0,ConfigCat.Client.User,System.Threading.CancellationToken)">
+            <summary>
+            Returns the value along with evaluation details of a feature flag or setting identified by <paramref name="key" /> asynchronously.
+            </summary>
+            <remarks>
+            It is important to provide an argument for the <paramref name="defaultValue" /> parameter, specifically for the <typeparamref name="T" /> generic type parameter,
+            that matches the type of the feature flag or setting you are evaluating.<br />
+            Please refer to <see href="https://configcat.com/docs/sdk-reference/dotnet/#setting-type-mapping">this table</see> for the corresponding types.
+            </remarks>
+            <typeparam name="T">
+            The type of the value. Only the following types are allowed:
+            <see cref="T:System.String" />, <see cref="T:System.Boolean" />, <see cref="T:System.Int32" />, <see cref="T:System.Int64" />, <see cref="T:System.Double" /> and <see cref="T:System.Object" /> (both nullable and non-nullable).<br />
+            The type must correspond to the setting type, otherwise <paramref name="defaultValue" /> will be returned.
+            </typeparam>
+            <param name="key">Key of the feature flag or setting.</param>
+            <param name="defaultValue">In case of failure, this value will be returned.</param>
+            <param name="user">The User Object to use for evaluating targeting rules and percentage options.</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+            <returns>A task that represents the asynchronous operation. The task result contains the value along with the details of evaluation of the feature flag or setting.</returns>
+            <exception cref="T:System.ArgumentNullException">
+                <paramref name="key" /> is <see langword="null" />.</exception>
+            <exception cref="T:System.ArgumentException">
+                <paramref name="key" /> is an empty string.</exception>
+            <exception cref="T:System.ArgumentException">
+                <typeparamref name="T" /> is not an allowed type.</exception>
+            <exception cref="T:System.OperationCanceledException">
+                <paramref name="cancellationToken" /> is canceled during the execution of the task.</exception>
+        </member>
+        <member name="M:ConfigCat.Client.ConfigCatClient.GetAllKeys">
+            <summary>
+            Returns all setting keys synchronously.
+            </summary>
+            <remarks>
+                <para>
+            Please be aware that calling this method on a thread pool thread or the main UI thread is safe only when the client is set up to use Auto or Manual Polling and in-memory caching.
+            Otherwise execution may involve I/O-bound (e.g. network) operations, because of which the executing thread may be blocked for a longer period of time. This can result in an unresponsive application.
+            In the case of problematic setups, it is recommended to use either the async version of the method or snaphots (see <see cref="M:ConfigCat.Client.IConfigCatClient.Snapshot" />).
+            </para>
+            </remarks>
+            <returns>The collection of keys.</returns>
+        </member>
+        <member name="M:ConfigCat.Client.ConfigCatClient.GetAllKeysAsync(System.Threading.CancellationToken)">
+            <summary>
+            Returns all setting keys asynchronously.
+            </summary>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+            <returns>A task that represents the asynchronous operation. The task result contains the collection of keys.</returns>
+        </member>
+        <member name="M:ConfigCat.Client.ConfigCatClient.GetAllValues(ConfigCat.Client.User)">
+            <summary>
+            Returns the keys and values of all feature flags and settings synchronously.
+            </summary>
+            <remarks>
+                <para>
+            Please be aware that calling this method on a thread pool thread or the main UI thread is safe only when the client is set up to use Auto or Manual Polling and in-memory caching.
+            Otherwise execution may involve I/O-bound (e.g. network) operations, because of which the executing thread may be blocked for a longer period of time. This can result in an unresponsive application.
+            In the case of problematic setups, it is recommended to use either the async version of the method or snaphots (see <see cref="M:ConfigCat.Client.IConfigCatClient.Snapshot" />).
+            </para>
+            </remarks>
+            <param name="user">The User Object to use for evaluating targeting rules and percentage options.</param>
+            <returns>The dictionary containing the keys and values.</returns>
+        </member>
+        <member name="M:ConfigCat.Client.ConfigCatClient.GetAllValuesAsync(ConfigCat.Client.User,System.Threading.CancellationToken)">
+            <summary>
+            Returns the keys and values of all feature flags and settings asynchronously.
+            </summary>
+            <param name="user">The User Object to use for evaluating targeting rules and percentage options.</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+            <returns>A task that represents the asynchronous operation. The task result contains the dictionary containing the keys and values.</returns>
+        </member>
+        <member name="M:ConfigCat.Client.ConfigCatClient.GetAllValueDetails(ConfigCat.Client.User)">
+            <summary>
+            Returns the values along with evaluation details of all feature flags and settings synchronously.
+            </summary>
+            <remarks>
+                <para>
+            Please be aware that calling this method on a thread pool thread or the main UI thread is safe only when the client is set up to use Auto or Manual Polling and in-memory caching.
+            Otherwise execution may involve I/O-bound (e.g. network) operations, because of which the executing thread may be blocked for a longer period of time. This can result in an unresponsive application.
+            In the case of problematic setups, it is recommended to use either the async version of the method or snaphots (see <see cref="M:ConfigCat.Client.IConfigCatClient.Snapshot" />).
+            </para>
+            </remarks>
+            <param name="user">The User Object to use for evaluating targeting rules and percentage options.</param>
+            <returns>The list of values along with evaluation details.</returns>
+        </member>
+        <member name="M:ConfigCat.Client.ConfigCatClient.GetAllValueDetailsAsync(ConfigCat.Client.User,System.Threading.CancellationToken)">
+            <summary>
+            Returns the values along with evaluation details of all feature flags and settings asynchronously.
+            </summary>
+            <param name="user">The User Object to use for evaluating targeting rules and percentage options.</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+            <returns>A task that represents the asynchronous operation. The task result contains the list of values along with evaluation details.</returns>
+        </member>
+        <member name="M:ConfigCat.Client.ConfigCatClient.GetKeyAndValue``1(System.String)">
+            <summary>
+            Returns the key of a feature flag or setting and its value identified by the given Variation ID (analytics) synchronously.
+            </summary>
+            <remarks>
+                <para>
+            Please be aware that calling this method on a thread pool thread or the main UI thread is safe only when the client is set up to use Auto or Manual Polling and in-memory caching.
+            Otherwise execution may involve I/O-bound (e.g. network) operations, because of which the executing thread may be blocked for a longer period of time. This can result in an unresponsive application.
+            In the case of problematic setups, it is recommended to use either the async version of the method or snaphots (see <see cref="M:ConfigCat.Client.IConfigCatClient.Snapshot" />).
+            </para>
+            </remarks>
+            <typeparam name="T">
+            The type of the value. Only the following types are allowed:
+            <see cref="T:System.String" />, <see cref="T:System.Boolean" />, <see cref="T:System.Int32" />, <see cref="T:System.Int64" />, <see cref="T:System.Double" /> and <see cref="T:System.Object" /> (both nullable and non-nullable).<br />
+            The type must correspond to the setting type, otherwise <see langword="null" /> will be returned.
+            </typeparam>
+            <param name="variationId">The Variation ID.</param>
+            <returns>The key of the feature flag or setting and its value.</returns>
+            <exception cref="T:System.ArgumentNullException">
+                <paramref name="variationId" /> is <see langword="null" />.</exception>
+            <exception cref="T:System.ArgumentException">
+                <paramref name="variationId" /> is an empty string.</exception>
+            <exception cref="T:System.ArgumentException">
+                <typeparamref name="T" /> is not an allowed type.</exception>
+        </member>
+        <member name="M:ConfigCat.Client.ConfigCatClient.GetKeyAndValueAsync``1(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Returns the key of a feature flag or setting and its value identified by the given Variation ID (analytics) asynchronously.
+            </summary>
+            <typeparam name="T">
+            The type of the value. Only the following types are allowed:
+            <see cref="T:System.String" />, <see cref="T:System.Boolean" />, <see cref="T:System.Int32" />, <see cref="T:System.Int64" />, <see cref="T:System.Double" /> and <see cref="T:System.Object" /> (both nullable and non-nullable).<br />
+            The type must correspond to the setting type, otherwise <see langword="null" /> will be returned.
+            </typeparam>
+            <param name="variationId">The Variation ID.</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+            <returns>A task that represents the asynchronous operation. The task result contains the key of the feature flag or setting and its value.</returns>
+            <exception cref="T:System.ArgumentNullException">
+                <paramref name="variationId" /> is <see langword="null" />.</exception>
+            <exception cref="T:System.ArgumentException">
+                <paramref name="variationId" /> is an empty string.</exception>
+            <exception cref="T:System.ArgumentException">
+                <typeparamref name="T" /> is not an allowed type.</exception>
+            <exception cref="T:System.OperationCanceledException">
+                <paramref name="cancellationToken" /> is canceled during the execution of the task.</exception>
+        </member>
+        <member name="M:ConfigCat.Client.ConfigCatClient.ForceRefresh">
+            <summary>
+            Refreshes the locally cached config by fetching the latest version from the remote server synchronously.
+            </summary>
+            <remarks>
+                <para>
+            Please be aware that calling this method on a thread pool thread or the main UI thread is not safe as
+            execution involves I/O-bound (e.g. network) operations, because of which the executing thread may be blocked for a longer period of time. This can result in an unresponsive application.
+            In the case of problematic setups, it is recommended to either use the async version of the method or call the method on a dedicated background thread.
+            </para>
+            </remarks>
+            <returns>The refresh result.</returns>
+        </member>
+        <member name="M:ConfigCat.Client.ConfigCatClient.ForceRefreshAsync(System.Threading.CancellationToken)">
+            <summary>
+            Refreshes the locally cached config by fetching the latest version from the remote server asynchronously.
+            </summary>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+            <returns>A task that represents the asynchronous operation. The task result contains the refresh result.</returns>
+        </member>
+        <member name="M:ConfigCat.Client.ConfigCatClient.SetDefaultUser(ConfigCat.Client.User)">
+            <summary>
+            Sets the default user.
+            </summary>
+            <param name="user">The default User Object to use for evaluating targeting rules and percentage options.</param>
+        </member>
+        <member name="M:ConfigCat.Client.ConfigCatClient.WaitForReadyAsync(System.Threading.CancellationToken)">
+            <summary>
+            Waits for the client to initialize (i.e. to raise the <see cref="E:ConfigCat.Client.IProvidesHooks.ClientReady" /> event).
+            </summary>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+            <returns>A task that represents the asynchronous operation. The task result contains the state of the local cache at the time the initialization was completed.</returns>
+        </member>
+        <member name="M:ConfigCat.Client.ConfigCatClient.Snapshot">
+            <summary>
+            Captures the current state of the client.
+            The resulting snapshot can be used to evaluate feature flags and settings based on the captured state synchronously,
+            without any underlying I/O-bound operations, which could block the executing thread for a longer period of time.
+            </summary>
+            <remarks>
+            The operation captures the in-memory stored config data. It does not attempt to update it by contacting the remote server.
+            It does not synchronize with the user-provided custom cache (see <see cref="P:ConfigCat.Client.Configuration.ConfigCatClientOptions.ConfigCache" />) either.<br />
+            Therefore, it is recommended to use snapshots in conjunction with the Auto Polling mode, where the SDK automatically updates the local cache in the background.<br />
+            For other polling modes, you'll need to manually initiate a cache refresh by invoking <see cref="M:ConfigCat.Client.IConfigCatClient.ForceRefresh" /> or <see cref="M:ConfigCat.Client.IConfigCatClient.ForceRefreshAsync(System.Threading.CancellationToken)" />.
+            </remarks>
+            <returns>The snapshot object.</returns>
+        </member>
+        <member name="M:ConfigCat.Client.ConfigCatClient.ClearDefaultUser">
+            <summary>
+            Clears the default user.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.ConfigCatClient.IsOffline">
+            <summary>
+            Returns <see langword="true" /> when the client is configured not to initiate HTTP requests, otherwise <see langword="false" />.
+            </summary>
+        </member>
+        <member name="M:ConfigCat.Client.ConfigCatClient.SetOnline">
+            <summary>
+            Configures the client to allow HTTP requests.
+            </summary>
+        </member>
+        <member name="M:ConfigCat.Client.ConfigCatClient.SetOffline">
+            <summary>
+            Configures the client to not initiate HTTP requests and work using the locally cached config only.
+            </summary>
+        </member>
+        <member name="E:ConfigCat.Client.ConfigCatClient.ClientReady">
+            <summary>
+            Occurs when the client is ready to provide the actual value of feature flags or settings.
+            </summary>
+        </member>
+        <member name="E:ConfigCat.Client.ConfigCatClient.FlagEvaluated">
+            <summary>
+            Occurs after the value of a feature flag of setting has been evaluated.
+            </summary>
+        </member>
+        <member name="E:ConfigCat.Client.ConfigCatClient.ConfigFetched">
+            <summary>
+            Occurs after attempting to refresh the locally cached config by fetching the latest version from the remote server.
+            </summary>
+        </member>
+        <member name="E:ConfigCat.Client.ConfigCatClient.ConfigChanged">
+            <summary>
+            Occurs after the locally cached config has been updated to a newer version.
+            </summary>
+        </member>
+        <member name="E:ConfigCat.Client.ConfigCatClient.Error">
+            <summary>
+            Occurs in the case of a failure in the client.
+            </summary>
+        </member>
+        <member name="T:ConfigCat.Client.ConfigCatClientSnapshot">
+            <summary>
+            Represents the state of <see cref="T:ConfigCat.Client.IConfigCatClient" /> captured at a specific point in time.
+            </summary>
+        </member>
+        <member name="M:ConfigCat.Client.ConfigCatClientSnapshot.#ctor(ConfigCat.Client.IConfigCatClientSnapshot)">
+            <summary>
+            For testing purposes. This constructor allows you to create an instance
+            which will use the fake implementation you provide instead of executing the built-in logic.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.ConfigCatClientSnapshot.CacheState">&gt;
+        </member>
+        <member name="P:ConfigCat.Client.ConfigCatClientSnapshot.FetchedConfig">&gt;
+        </member>
+        <member name="M:ConfigCat.Client.ConfigCatClientSnapshot.GetAllKeys">&gt;
+        </member>
+        <member name="M:ConfigCat.Client.ConfigCatClientSnapshot.GetValue``1(System.String,``0,ConfigCat.Client.User)">&gt;
+        </member>
+        <member name="M:ConfigCat.Client.ConfigCatClientSnapshot.GetValueDetails``1(System.String,``0,ConfigCat.Client.User)">&gt;
+        </member>
+        <member name="M:ConfigCat.Client.ConfigCatClientSnapshot.GetKeyAndValue``1(System.String)">&gt;
+        </member>
+        <member name="T:ConfigCat.Client.ConfigService.ConfigServiceBase" />
+        <member name="M:ConfigCat.Client.ConfigService.ConfigServiceBase.DisposeSynchronized(System.Boolean)">
+            <remarks>
+            Note for inheritors. Beware, this method is called within a lock statement.
+            </remarks>
+        </member>
+        <member name="M:ConfigCat.Client.ConfigService.ConfigServiceBase.SetOnlineCoreSynchronized">
+            <remarks>
+            Note for inheritors. Beware, this method is called within a lock statement.
+            </remarks>
+        </member>
+        <member name="M:ConfigCat.Client.ConfigService.ConfigServiceBase.SetOfflineCoreSynchronized">
+            <remarks>
+            Note for inheritors. Beware, this method is called within a lock statement.
+            </remarks>
+        </member>
+        <member name="T:ConfigCat.Client.ClientCacheState">
+            <summary>
+            Specifies the possible states of the local cache.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.ClientCacheState.NoFlagData">
+            <summary>
+            No feature flag data is available in the local cache.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.ClientCacheState.HasLocalOverrideFlagDataOnly">
+            <summary>
+            Feature flag data provided by local flag override is only available in the local cache.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.ClientCacheState.HasCachedFlagDataOnly">
+            <summary>
+            Out-of-date feature flag data downloaded from the remote server is available in the local cache.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.ClientCacheState.HasUpToDateFlagData">
+            <summary>
+            Up-to-date feature flag data downloaded from the remote server is available in the local cache.
+            </summary>
+        </member>
+        <member name="T:ConfigCat.Client.FetchErrorException">
+            <summary>
+            Represents errors that can occur during a ConfigCat config fetch operation.
+            </summary>
+        </member>
+        <member name="M:ConfigCat.Client.FetchErrorException.Timeout(System.TimeSpan,System.Exception)">
+            <summary>
+            Creates an instance of the <see cref="T:ConfigCat.Client.FetchErrorException" /> class which indicates that the operation timed out.
+            </summary>
+        </member>
+        <member name="M:ConfigCat.Client.FetchErrorException.Failure(System.Nullable{System.Net.WebExceptionStatus},System.Exception)">
+            <summary>
+            Creates an instance of the <see cref="T:ConfigCat.Client.FetchErrorException" /> class which indicates that the operation failed due to a network or protocol error.
+            </summary>
+        </member>
+        <member name="T:ConfigCat.Client.FetchRequest">
+            <summary>
+            The request parameters for a ConfigCat config fetch operation.
+            </summary>
+        </member>
+        <member name="M:ConfigCat.Client.FetchRequest.#ctor(System.Uri,System.String,System.Collections.Generic.IReadOnlyList{System.Collections.Generic.KeyValuePair{System.String,System.String}},System.TimeSpan)">
+            <summary>
+            Initializes a new instance of the <see cref="T:ConfigCat.Client.FetchRequest" /> struct.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.FetchRequest.Uri">
+            <summary>
+            The URI of the config.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.FetchRequest.LastETag">
+            <summary>
+            The value of the <c>ETag</c> HTTP response header received during the last successful request (if any).
+            If available, should be included in the HTTP request, either in the <c>If-None-Match</c> header or in the <c>ccetag</c> query string parameter.
+            </summary>
+            <remarks>
+            In browser runtime environments the <c>If-None-Match</c> header should be avoided because that may cause unnecessary CORS preflight requests.
+            </remarks>
+        </member>
+        <member name="P:ConfigCat.Client.FetchRequest.Headers">
+            <summary>
+            Additional HTTP request headers. Should be included in every HTTP request.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.FetchRequest.Timeout">
+            <summary>
+            The request timeout to apply, configured via <see cref="P:ConfigCat.Client.Configuration.ConfigCatClientOptions.HttpTimeout" />.
+            </summary>
+        </member>
+        <member name="T:ConfigCat.Client.FetchResponse">
+            <summary>
+            The response data of a ConfigCat config fetch operation.
+            </summary>
+        </member>
+        <member name="M:ConfigCat.Client.FetchResponse.#ctor(System.Net.HttpStatusCode,System.String,System.Collections.Generic.IEnumerable{System.Collections.Generic.KeyValuePair{System.String,System.String}},System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:ConfigCat.Client.FetchResponse" /> struct.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.FetchResponse.StatusCode">
+            <summary>
+            The HTTP status code.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.FetchResponse.ReasonPhrase">
+            <summary>
+            The HTTP reason phrase.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.FetchResponse.ETag">
+            <summary>
+            The value of the <c>ETag</c> HTTP response header.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.FetchResponse.Body">
+            <summary>
+            The response body.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.FetchResponse.IsExpected">
+            <summary>
+            Indicates whether the response is expected or not.
+            </summary>
+        </member>
+        <member name="T:ConfigCat.Client.IConfigCatConfigFetcher">
+            <summary>
+            Defines the interface used by the ConfigCat SDK to perform ConfigCat config fetch operations.
+            </summary>
+        </member>
+        <member name="M:ConfigCat.Client.IConfigCatConfigFetcher.FetchAsync(ConfigCat.Client.FetchRequest,System.Threading.CancellationToken)">
+            <summary>
+            Fetches the JSON content of the requested config asynchronously.
+            </summary>
+            <param name="request">The fetch request.</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to complete.
+            If the token is canceled, the request should be aborted.</param>
+            <returns>A task that represents the asynchronous operation. The task result contains the fetch response.</returns>
+            <exception cref="T:ConfigCat.Client.FetchErrorException">The fetch operation failed.</exception>
+            <exception cref="T:System.OperationCanceledException">
+                <paramref name="cancellationToken" /> is canceled during the execution of the task.</exception>
+        </member>
+        <member name="T:ConfigCat.Client.IConfigFetcher">
+            <summary>
+            Defines the interface of the service used to fetch configs.
+            </summary>
+        </member>
+        <member name="M:ConfigCat.Client.IConfigFetcher.FetchAsync(ConfigCat.Client.ProjectConfig,System.Threading.CancellationToken)">
+            <summary>
+            Fetches the configuration asynchronously.
+            </summary>
+            <param name="lastConfig">Last fetched configuration if it is present.</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+            <returns>A task that represents the asynchronous operation. The task result contains the fetched config.</returns>
+        </member>
+        <member name="M:ConfigCat.Client.IConfigFetcher.Fetch(ConfigCat.Client.ProjectConfig)">
+            <summary>
+            Fetches the configuration synchronously.
+            </summary>
+            <param name="lastConfig">Last fetched configuration if it is present.</param>
+            <returns>The fetched config.</returns>
+        </member>
+        <member name="T:ConfigCat.Client.Configuration.ConfigCatClientOptions">
+            <summary>
+            Options used to configure the ConfigCat SDK.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.Configuration.ConfigCatClientOptions.LogFilter">
+            <summary>
+            An optional callback that can be used to filter log events beyond the minimum log level setting
+            (<see cref="P:ConfigCat.Client.IConfigCatLogger.LogLevel" /> and <see cref="P:ConfigCat.Client.ConfigCatClient.LogLevel" />).
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.Configuration.ConfigCatClientOptions.Logger">
+            <summary>
+            The logger implementation to use for performing logging.
+            If not set, <see cref="T:ConfigCat.Client.ConsoleLogger" /> with <see cref="F:ConfigCat.Client.LogLevel.Warning" /> will be used by default.<br />
+            If you want to use custom logging instead, you can provide an implementation of <see cref="T:ConfigCat.Client.IConfigCatLogger" />.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.Configuration.ConfigCatClientOptions.ConfigFetcher">
+            <summary>
+            The config fetcher implementation to use for performing ConfigCat config fetch operations.
+            If not set, <see cref="T:ConfigCat.Client.DefaultConfigFetcher" /> will be used by default, which is based on <see cref="T:System.Net.Http.HttpClient" />.<br />
+            If you want to use custom a config fetcher, you can provide an implementation of <see cref="T:ConfigCat.Client.IConfigCatConfigFetcher" />.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.Configuration.ConfigCatClientOptions.ConfigCache">
+            <summary>
+            The cache implementation to use for storing and retrieving downloaded config data.
+            If not set, <see cref="T:ConfigCat.Client.Cache.InMemoryConfigCache" /> will be used by default.<br />
+            If you want to use custom caching instead, you can provide an implementation of <see cref="T:ConfigCat.Client.IConfigCatCache" />.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.Configuration.ConfigCatClientOptions.PollingMode">
+            <summary>
+            The polling mode to use.
+            If not set, <see cref="M:ConfigCat.Client.PollingModes.AutoPoll(System.Nullable{System.TimeSpan},System.Nullable{System.TimeSpan})" /> will be used by default.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.Configuration.ConfigCatClientOptions.HttpClientHandler">
+            <summary>
+            An optional <see cref="T:System.Net.Http.HttpClientHandler" /> for providing network credentials and proxy settings.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.Configuration.ConfigCatClientOptions.BaseUrl">
+            <summary>
+            The base URL of the remote server providing the latest version of the config.
+            Defaults to the URL of the ConfigCat CDN.<br />
+            If you want to use a proxy server between your application and ConfigCat, you need to set this property to the proxy URL.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.Configuration.ConfigCatClientOptions.DataGovernance">
+            <summary>
+            Set this property to be in sync with the Data Governance preference on the Dashboard:
+            https://app.configcat.com/organization/data-governance (only Organization Admins have access).
+            Defaults to <see cref="F:ConfigCat.Client.DataGovernance.Global" />.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.Configuration.ConfigCatClientOptions.HttpTimeout">
+            <summary>
+            Timeout for underlying HTTP calls. Defaults to 30 seconds.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.Configuration.ConfigCatClientOptions.FlagOverrides">
+            <summary>
+            The flag override to use. If not set, no flag override will be used.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.Configuration.ConfigCatClientOptions.DefaultUser">
+            <summary>
+            The default user, used as fallback when there's no user parameter is passed to the setting evaluation methods like <see cref="M:ConfigCat.Client.IConfigCatClient.GetValue``1(System.String,``0,ConfigCat.Client.User)" />, <see cref="M:ConfigCat.Client.IConfigCatClient.GetValueDetails``1(System.String,``0,ConfigCat.Client.User)" />, etc.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.Configuration.ConfigCatClientOptions.Offline">
+            <summary>
+            Indicates whether the client should be initialized to offline mode or not. Defaults to <see langword="false" />.
+            </summary>
+        </member>
+        <member name="E:ConfigCat.Client.Configuration.ConfigCatClientOptions.ClientReady">
+            <summary>
+            Occurs when the client is ready to provide the actual value of feature flags or settings.
+            </summary>
+        </member>
+        <member name="E:ConfigCat.Client.Configuration.ConfigCatClientOptions.FlagEvaluated">
+            <summary>
+            Occurs after the value of a feature flag of setting has been evaluated.
+            </summary>
+        </member>
+        <member name="E:ConfigCat.Client.Configuration.ConfigCatClientOptions.ConfigFetched">
+            <summary>
+            Occurs after attempting to refresh the locally cached config by fetching the latest version from the remote server.
+            </summary>
+        </member>
+        <member name="E:ConfigCat.Client.Configuration.ConfigCatClientOptions.ConfigChanged">
+            <summary>
+            Occurs after the locally cached config has been updated to a newer version.
+            </summary>
+        </member>
+        <member name="E:ConfigCat.Client.Configuration.ConfigCatClientOptions.Error">
+            <summary>
+            Occurs in the case of a failure in the client.
+            </summary>
+        </member>
+        <member name="T:ConfigCat.Client.Configuration.PlatformCompatibilityOptions">
+            <summary>
+            Provides compatibility options to make the SDK work on platforms that are not fully standards compliant.
+            </summary>
+        </member>
+        <member name="T:ConfigCat.Client.Configuration.PollingMode">
+            <summary>
+            Defines the base class for polling modes.
+            </summary>
+        </member>
+        <member name="T:ConfigCat.Client.Configuration.AutoPoll">
+            <summary>
+            Represents the Auto Polling mode along with its settings.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.Configuration.AutoPoll.PollInterval">
+            <summary>
+            Config refresh interval.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.Configuration.AutoPoll.MaxInitWaitTime">
+            <summary>
+            Maximum waiting time between initialization and the first config acquisition.
+            </summary>
+        </member>
+        <member name="T:ConfigCat.Client.Configuration.LazyLoad">
+            <summary>
+            Represents the Lazy Loading mode along with its settings.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.Configuration.LazyLoad.CacheTimeToLive">
+            <summary>
+            Cache time to live value.
+            </summary>
+        </member>
+        <member name="T:ConfigCat.Client.Configuration.ManualPoll">
+            <summary>
+            Represents the Manual Polling mode.
+            </summary>
+        </member>
+        <member name="T:ConfigCat.Client.DataGovernance">
+            <summary>
+            Controls the location of the config JSON files containing your feature flags and settings within the ConfigCat CDN.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.DataGovernance.Global">
+            <summary>
+            Choose this option if your config JSON files are published to all global CDN nodes.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.DataGovernance.EuOnly">
+            <summary>
+            Choose this option if your config JSON files are published to CDN nodes only in the EU.
+            </summary>
+        </member>
+        <member name="T:ConfigCat.Client.PollingModes">
+            <summary>
+            Provides static factory methods for the supported polling modes.
+            </summary>
+        </member>
+        <member name="M:ConfigCat.Client.PollingModes.AutoPoll(System.Nullable{System.TimeSpan},System.Nullable{System.TimeSpan})">
+            <summary>
+            Creates an instance of the <see cref="T:ConfigCat.Client.Configuration.AutoPoll" /> class with the specified settings.
+            </summary>
+            <param name="pollInterval">
+            Config refresh interval.
+            Specifies how frequently the locally cached config will be refreshed by fetching the latest version from the remote server.<br />
+            (Default value is 60 seconds. Minimum value is 1 second. Maximum value is <see cref="F:System.Int32.MaxValue" /> milliseconds.)
+            </param>
+            <param name="maxInitWaitTime">
+            Maximum waiting time between initialization and the first config acquisition.<br />
+            (Default value is 5 seconds. Maximum value is <see cref="F:System.Int32.MaxValue" /> milliseconds. Negative values mean infinite waiting.)
+            </param>
+            <returns>The new <see cref="T:ConfigCat.Client.Configuration.AutoPoll" /> instance.</returns>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+                <paramref name="pollInterval" /> is outside the allowed range.</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+                <paramref name="maxInitWaitTime" /> is outside the allowed range.</exception>
+        </member>
+        <member name="M:ConfigCat.Client.PollingModes.LazyLoad(System.Nullable{System.TimeSpan})">
+            <summary>
+            Creates an instance of the <see cref="T:ConfigCat.Client.Configuration.LazyLoad" /> class with the specified settings.
+            </summary>
+            <param name="cacheTimeToLive">
+            Cache time to live value.
+            Specifies how long the locally cached config can be used before refreshing it again by fetching the latest version from the remote server.<br />
+            (Default value is 60 seconds. Minimum value is 1 second. Maximum value is <see cref="F:System.Int32.MaxValue" /> seconds.)
+            </param>
+            <returns>The new <see cref="T:ConfigCat.Client.Configuration.LazyLoad" /> instance.</returns>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+                <paramref name="cacheTimeToLive" /> is outside the allowed range.</exception>
+        </member>
+        <member name="F:ConfigCat.Client.PollingModes.ManualPoll">
+            <summary>
+            Provides an instance of the <see cref="T:ConfigCat.Client.Configuration.ManualPoll" /> class.
+            </summary>
+        </member>
+        <member name="T:ConfigCat.Client.EvaluationDetails">
+            <summary>
+            The evaluated value and additional information about the evaluation of a feature flag or setting.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.EvaluationDetails.Key">
+            <summary>
+            Key of the feature flag or setting.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.EvaluationDetails.Value">
+            <summary>
+            Evaluated value of the feature flag or setting.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.EvaluationDetails.VariationId">
+            <summary>
+            Variation ID of the feature flag or setting (if available).
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.EvaluationDetails.FetchTime">
+            <summary>
+            Time of last successful config download (or <see cref="F:System.DateTime.MinValue" /> if there has been no successful download yet).
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.EvaluationDetails.User">
+            <summary>
+            The User Object used for the evaluation (if available).
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.EvaluationDetails.IsDefaultValue">
+            <summary>
+            Indicates whether the default value passed to the setting evaluation methods like <see cref="M:ConfigCat.Client.IConfigCatClient.GetValue``1(System.String,``0,ConfigCat.Client.User)" />, <see cref="M:ConfigCat.Client.IConfigCatClient.GetValueDetails``1(System.String,``0,ConfigCat.Client.User)" />, etc.
+            is used as the result of the evaluation.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.EvaluationDetails.ErrorCode">
+            <summary>
+            The code identifying the reason for the error in case evaluation failed.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.EvaluationDetails.ErrorMessage">
+            <summary>
+            Error message in case evaluation failed.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.EvaluationDetails.ErrorException">
+            <summary>
+            The <see cref="T:System.Exception" /> object related to the error in case evaluation failed (if any).
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.EvaluationDetails.MatchedTargetingRule">
+            <summary>
+            The targeting rule (if any) that matched during the evaluation and was used to return the evaluated value.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.EvaluationDetails.MatchedPercentageOption">
+            <summary>
+            The percentage option (if any) that was used to select the evaluated value.
+            </summary>
+        </member>
+        <member name="T:ConfigCat.Client.EvaluationDetails`1">
+            <summary>
+            The evaluated value and additional information about the evaluation of a feature flag or setting.
+            </summary>
+        </member>
+        <member name="M:ConfigCat.Client.EvaluationDetails`1.#ctor(System.String,`0)">
+            <summary>
+            Initializes a new instance of the <see cref="T:ConfigCat.Client.EvaluationDetails`1" /> class.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.EvaluationDetails`1.Value">
+            <summary>
+            Evaluated value of the feature flag or setting.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.EvaluationDetails`1.Key">
+            <summary>
+            Key of the feature flag or setting.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.EvaluationDetails`1.VariationId">
+            <summary>
+            Variation ID of the feature flag or setting (if available).
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.EvaluationDetails`1.FetchTime">
+            <summary>
+            Time of last successful config download (or <see cref="F:System.DateTime.MinValue" /> if there has been no successful download yet).
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.EvaluationDetails`1.User">
+            <summary>
+            The User Object used for the evaluation (if available).
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.EvaluationDetails`1.IsDefaultValue">
+            <summary>
+            Indicates whether the default value passed to the setting evaluation methods like <see cref="M:ConfigCat.Client.IConfigCatClient.GetValue``1(System.String,``0,ConfigCat.Client.User)" />, <see cref="M:ConfigCat.Client.IConfigCatClient.GetValueDetails``1(System.String,``0,ConfigCat.Client.User)" />, etc.
+            is used as the result of the evaluation.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.EvaluationDetails`1.ErrorCode">
+            <summary>
+            The code identifying the reason for the error in case evaluation failed.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.EvaluationDetails`1.ErrorMessage">
+            <summary>
+            Error message in case evaluation failed.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.EvaluationDetails`1.ErrorException">
+            <summary>
+            The <see cref="T:System.Exception" /> object related to the error in case evaluation failed (if any).
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.EvaluationDetails`1.MatchedTargetingRule">
+            <summary>
+            The targeting rule (if any) that matched during the evaluation and was used to return the evaluated value.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.EvaluationDetails`1.MatchedPercentageOption">
+            <summary>
+            The percentage option (if any) that was used to select the evaluated value.
+            </summary>
+        </member>
+        <member name="T:ConfigCat.Client.EvaluationErrorCode">
+            <summary>
+            Specifies the possible evaluation error codes.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.EvaluationErrorCode.UnexpectedError">
+            <summary>
+            An unexpected error occurred during the evaluation.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.EvaluationErrorCode.None">
+            <summary>
+            No error occurred (the evaluation was successful).
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.EvaluationErrorCode.InvalidConfigModel">
+            <summary>
+            The evaluation failed because of an error in the config model. (Most likely, invalid data was passed to the SDK via flag overrides.)
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.EvaluationErrorCode.SettingValueTypeMismatch">
+            <summary>
+            The evaluation failed because of a type mismatch between the evaluated setting value and the specified default value.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.EvaluationErrorCode.ConfigJsonNotAvailable">
+            <summary>
+            The evaluation failed because the config JSON was not available locally.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.EvaluationErrorCode.SettingKeyMissing">
+            <summary>
+            The evaluation failed because the key of the evaluated setting was not found in the config JSON.
+            </summary>
+        </member>
+        <member name="T:ConfigCat.Client.ClientReadyEventArgs">
+            <summary>
+            Provides data for the <see cref="E:ConfigCat.Client.ConfigCatClient.ClientReady" /> event.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.ClientReadyEventArgs.CacheState">
+            <summary>
+            The state of the local cache at the time the initialization was completed.
+            </summary>
+        </member>
+        <member name="T:ConfigCat.Client.ConfigCatClientErrorEventArgs">
+            <summary>
+            Provides data for the <see cref="E:ConfigCat.Client.ConfigCatClient.Error" /> event.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.ConfigCatClientErrorEventArgs.Message">
+            <summary>
+            Error message.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.ConfigCatClientErrorEventArgs.Exception">
+            <summary>
+            The <see cref="T:System.Exception" /> object related to the error (if any).
+            </summary>
+        </member>
+        <member name="T:ConfigCat.Client.ConfigChangedEventArgs">
+            <summary>
+            Provides data for the <see cref="E:ConfigCat.Client.ConfigCatClient.ConfigChanged" /> event.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.ConfigChangedEventArgs.NewConfig">
+            <summary>
+            The new <see cref="T:ConfigCat.Client.IConfig" /> object.
+            </summary>
+        </member>
+        <member name="T:ConfigCat.Client.ConfigFetchedEventArgs">
+            <summary>
+            Provides data for the <see cref="E:ConfigCat.Client.ConfigCatClient.ConfigFetched" /> event.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.ConfigFetchedEventArgs.Result">
+            <summary>
+            The result of the operation.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.ConfigFetchedEventArgs.IsInitiatedByUser">
+            <summary>
+            Indicates whether the operation was initiated by the user or by the SDK.
+            </summary>
+        </member>
+        <member name="T:ConfigCat.Client.FlagEvaluatedEventArgs">
+            <summary>
+            Provides data for the <see cref="E:ConfigCat.Client.ConfigCatClient.FlagEvaluated" /> event.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.FlagEvaluatedEventArgs.EvaluationDetails">
+            <summary>
+            The <see cref="T:ConfigCat.Client.EvaluationDetails" /> object resulted from the evaluation of a feature flag or setting.
+            </summary>
+        </member>
+        <member name="T:ConfigCat.Client.IProvidesHooks">
+            <summary>
+            Defines hooks (events) for providing notifications of <see cref="T:ConfigCat.Client.ConfigCatClient" />'s actions.
+            </summary>
+        </member>
+        <member name="E:ConfigCat.Client.IProvidesHooks.ClientReady">
+            <summary>
+            Occurs when the client is ready to provide the actual value of feature flags or settings.
+            </summary>
+        </member>
+        <member name="E:ConfigCat.Client.IProvidesHooks.FlagEvaluated">
+            <summary>
+            Occurs after the value of a feature flag of setting has been evaluated.
+            </summary>
+        </member>
+        <member name="E:ConfigCat.Client.IProvidesHooks.ConfigFetched">
+            <summary>
+            Occurs after attempting to refresh the locally cached config by fetching the latest version from the remote server.
+            </summary>
+        </member>
+        <member name="E:ConfigCat.Client.IProvidesHooks.ConfigChanged">
+            <summary>
+            Occurs after the locally cached config has been updated to a newer version.
+            </summary>
+        </member>
+        <member name="E:ConfigCat.Client.IProvidesHooks.Error">
+            <summary>
+            Occurs in the case of a failure in the client.
+            </summary>
+        </member>
+        <member name="T:ConfigCat.Client.IConfigCatClient">
+            <summary>
+            Defines the public interface of the <see cref="T:ConfigCat.Client.ConfigCatClient" /> class.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.IConfigCatClient.LogLevel">
+            <summary>
+            Gets or sets the log level (the minimum level to use for filtering log events).
+            </summary>
+        </member>
+        <member name="M:ConfigCat.Client.IConfigCatClient.GetValue``1(System.String,``0,ConfigCat.Client.User)">
+            <summary>
+            Returns the value of a feature flag or setting identified by <paramref name="key" /> synchronously.
+            </summary>
+            <remarks>
+            It is important to provide an argument for the <paramref name="defaultValue" /> parameter, specifically for the <typeparamref name="T" /> generic type parameter,
+            that matches the type of the feature flag or setting you are evaluating.<br />
+            Please refer to <see href="https://configcat.com/docs/sdk-reference/dotnet/#setting-type-mapping">this table</see> for the corresponding types.
+            <para>
+            Please be aware that calling this method on a thread pool thread or the main UI thread is safe only when the client is set up to use Auto or Manual Polling and in-memory caching.
+            Otherwise execution may involve I/O-bound (e.g. network) operations, because of which the executing thread may be blocked for a longer period of time. This can result in an unresponsive application.
+            In the case of problematic setups, it is recommended to use either the async version of the method or snaphots (see <see cref="M:ConfigCat.Client.IConfigCatClient.Snapshot" />).
+            </para></remarks>
+            <typeparam name="T">
+            The type of the value. Only the following types are allowed:
+            <see cref="T:System.String" />, <see cref="T:System.Boolean" />, <see cref="T:System.Int32" />, <see cref="T:System.Int64" />, <see cref="T:System.Double" /> and <see cref="T:System.Object" /> (both nullable and non-nullable).<br />
+            The type must correspond to the setting type, otherwise <paramref name="defaultValue" /> will be returned.
+            </typeparam>
+            <param name="key">Key of the feature flag or setting.</param>
+            <param name="defaultValue">In case of failure, this value will be returned.</param>
+            <param name="user">The User Object to use for evaluating targeting rules and percentage options.</param>
+            <returns>The value of the feature flag or setting.</returns>
+            <exception cref="T:System.ArgumentNullException">
+                <paramref name="key" /> is <see langword="null" />.</exception>
+            <exception cref="T:System.ArgumentException">
+                <paramref name="key" /> is an empty string.</exception>
+            <exception cref="T:System.ArgumentException">
+                <typeparamref name="T" /> is not an allowed type.</exception>
+        </member>
+        <member name="M:ConfigCat.Client.IConfigCatClient.GetValueAsync``1(System.String,``0,ConfigCat.Client.User,System.Threading.CancellationToken)">
+            <summary>
+            Returns the value of a feature flag or setting identified by <paramref name="key" /> asynchronously.
+            </summary>
+            <remarks>
+            It is important to provide an argument for the <paramref name="defaultValue" /> parameter, specifically for the <typeparamref name="T" /> generic type parameter,
+            that matches the type of the feature flag or setting you are evaluating.<br />
+            Please refer to <see href="https://configcat.com/docs/sdk-reference/dotnet/#setting-type-mapping">this table</see> for the corresponding types.
+            </remarks>
+            <typeparam name="T">
+            The type of the value. Only the following types are allowed:
+            <see cref="T:System.String" />, <see cref="T:System.Boolean" />, <see cref="T:System.Int32" />, <see cref="T:System.Int64" />, <see cref="T:System.Double" /> and <see cref="T:System.Object" /> (both nullable and non-nullable).<br />
+            The type must correspond to the setting type, otherwise <paramref name="defaultValue" /> will be returned.
+            </typeparam>
+            <param name="key">Key of the feature flag or setting.</param>
+            <param name="defaultValue">In case of failure, this value will be returned.</param>
+            <param name="user">The User Object to use for evaluating targeting rules and percentage options.</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+            <returns>A task that represents the asynchronous operation. The task result contains the value of the feature flag or setting.</returns>
+            <exception cref="T:System.ArgumentNullException">
+                <paramref name="key" /> is <see langword="null" />.</exception>
+            <exception cref="T:System.ArgumentException">
+                <paramref name="key" /> is an empty string.</exception>
+            <exception cref="T:System.ArgumentException">
+                <typeparamref name="T" /> is not an allowed type.</exception>
+            <exception cref="T:System.OperationCanceledException">
+                <paramref name="cancellationToken" /> is canceled during the execution of the task.</exception>
+        </member>
+        <member name="M:ConfigCat.Client.IConfigCatClient.GetValueDetails``1(System.String,``0,ConfigCat.Client.User)">
+            <summary>
+            Returns the value along with evaluation details of a feature flag or setting identified by <paramref name="key" /> synchronously.
+            </summary>
+            <remarks>
+            It is important to provide an argument for the <paramref name="defaultValue" /> parameter, specifically for the <typeparamref name="T" /> generic type parameter,
+            that matches the type of the feature flag or setting you are evaluating.<br />
+            Please refer to <see href="https://configcat.com/docs/sdk-reference/dotnet/#setting-type-mapping">this table</see> for the corresponding types.
+            <para>
+            Please be aware that calling this method on a thread pool thread or the main UI thread is safe only when the client is set up to use Auto or Manual Polling and in-memory caching.
+            Otherwise execution may involve I/O-bound (e.g. network) operations, because of which the executing thread may be blocked for a longer period of time. This can result in an unresponsive application.
+            In the case of problematic setups, it is recommended to use either the async version of the method or snaphots (see <see cref="M:ConfigCat.Client.IConfigCatClient.Snapshot" />).
+            </para></remarks>
+            <typeparam name="T">
+            The type of the value. Only the following types are allowed:
+            <see cref="T:System.String" />, <see cref="T:System.Boolean" />, <see cref="T:System.Int32" />, <see cref="T:System.Int64" />, <see cref="T:System.Double" /> and <see cref="T:System.Object" /> (both nullable and non-nullable).<br />
+            The type must correspond to the setting type, otherwise <paramref name="defaultValue" /> will be returned.
+            </typeparam>
+            <param name="key">Key of the feature flag or setting.</param>
+            <param name="defaultValue">In case of failure, this value will be returned.</param>
+            <param name="user">The User Object to use for evaluating targeting rules and percentage options.</param>
+            <returns>The value along with the details of evaluation of the feature flag or setting.</returns>
+            <exception cref="T:System.ArgumentNullException">
+                <paramref name="key" /> is <see langword="null" />.</exception>
+            <exception cref="T:System.ArgumentException">
+                <paramref name="key" /> is an empty string.</exception>
+            <exception cref="T:System.ArgumentException">
+                <typeparamref name="T" /> is not an allowed type.</exception>
+        </member>
+        <member name="M:ConfigCat.Client.IConfigCatClient.GetValueDetailsAsync``1(System.String,``0,ConfigCat.Client.User,System.Threading.CancellationToken)">
+            <summary>
+            Returns the value along with evaluation details of a feature flag or setting identified by <paramref name="key" /> asynchronously.
+            </summary>
+            <remarks>
+            It is important to provide an argument for the <paramref name="defaultValue" /> parameter, specifically for the <typeparamref name="T" /> generic type parameter,
+            that matches the type of the feature flag or setting you are evaluating.<br />
+            Please refer to <see href="https://configcat.com/docs/sdk-reference/dotnet/#setting-type-mapping">this table</see> for the corresponding types.
+            </remarks>
+            <typeparam name="T">
+            The type of the value. Only the following types are allowed:
+            <see cref="T:System.String" />, <see cref="T:System.Boolean" />, <see cref="T:System.Int32" />, <see cref="T:System.Int64" />, <see cref="T:System.Double" /> and <see cref="T:System.Object" /> (both nullable and non-nullable).<br />
+            The type must correspond to the setting type, otherwise <paramref name="defaultValue" /> will be returned.
+            </typeparam>
+            <param name="key">Key of the feature flag or setting.</param>
+            <param name="defaultValue">In case of failure, this value will be returned.</param>
+            <param name="user">The User Object to use for evaluating targeting rules and percentage options.</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+            <returns>A task that represents the asynchronous operation. The task result contains the value along with the details of evaluation of the feature flag or setting.</returns>
+            <exception cref="T:System.ArgumentNullException">
+                <paramref name="key" /> is <see langword="null" />.</exception>
+            <exception cref="T:System.ArgumentException">
+                <paramref name="key" /> is an empty string.</exception>
+            <exception cref="T:System.ArgumentException">
+                <typeparamref name="T" /> is not an allowed type.</exception>
+            <exception cref="T:System.OperationCanceledException">
+                <paramref name="cancellationToken" /> is canceled during the execution of the task.</exception>
+        </member>
+        <member name="M:ConfigCat.Client.IConfigCatClient.GetAllKeys">
+            <summary>
+            Returns all setting keys synchronously.
+            </summary>
+            <remarks>
+                <para>
+            Please be aware that calling this method on a thread pool thread or the main UI thread is safe only when the client is set up to use Auto or Manual Polling and in-memory caching.
+            Otherwise execution may involve I/O-bound (e.g. network) operations, because of which the executing thread may be blocked for a longer period of time. This can result in an unresponsive application.
+            In the case of problematic setups, it is recommended to use either the async version of the method or snaphots (see <see cref="M:ConfigCat.Client.IConfigCatClient.Snapshot" />).
+            </para>
+            </remarks>
+            <returns>The collection of keys.</returns>
+        </member>
+        <member name="M:ConfigCat.Client.IConfigCatClient.GetAllKeysAsync(System.Threading.CancellationToken)">
+            <summary>
+            Returns all setting keys asynchronously.
+            </summary>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+            <returns>A task that represents the asynchronous operation. The task result contains the collection of keys.</returns>
+        </member>
+        <member name="M:ConfigCat.Client.IConfigCatClient.GetAllValues(ConfigCat.Client.User)">
+            <summary>
+            Returns the keys and values of all feature flags and settings synchronously.
+            </summary>
+            <remarks>
+                <para>
+            Please be aware that calling this method on a thread pool thread or the main UI thread is safe only when the client is set up to use Auto or Manual Polling and in-memory caching.
+            Otherwise execution may involve I/O-bound (e.g. network) operations, because of which the executing thread may be blocked for a longer period of time. This can result in an unresponsive application.
+            In the case of problematic setups, it is recommended to use either the async version of the method or snaphots (see <see cref="M:ConfigCat.Client.IConfigCatClient.Snapshot" />).
+            </para>
+            </remarks>
+            <param name="user">The User Object to use for evaluating targeting rules and percentage options.</param>
+            <returns>The dictionary containing the keys and values.</returns>
+        </member>
+        <member name="M:ConfigCat.Client.IConfigCatClient.GetAllValuesAsync(ConfigCat.Client.User,System.Threading.CancellationToken)">
+            <summary>
+            Returns the keys and values of all feature flags and settings asynchronously.
+            </summary>
+            <param name="user">The User Object to use for evaluating targeting rules and percentage options.</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+            <returns>A task that represents the asynchronous operation. The task result contains the dictionary containing the keys and values.</returns>
+        </member>
+        <member name="M:ConfigCat.Client.IConfigCatClient.GetAllValueDetails(ConfigCat.Client.User)">
+            <summary>
+            Returns the values along with evaluation details of all feature flags and settings synchronously.
+            </summary>
+            <remarks>
+                <para>
+            Please be aware that calling this method on a thread pool thread or the main UI thread is safe only when the client is set up to use Auto or Manual Polling and in-memory caching.
+            Otherwise execution may involve I/O-bound (e.g. network) operations, because of which the executing thread may be blocked for a longer period of time. This can result in an unresponsive application.
+            In the case of problematic setups, it is recommended to use either the async version of the method or snaphots (see <see cref="M:ConfigCat.Client.IConfigCatClient.Snapshot" />).
+            </para>
+            </remarks>
+            <param name="user">The User Object to use for evaluating targeting rules and percentage options.</param>
+            <returns>The list of values along with evaluation details.</returns>
+        </member>
+        <member name="M:ConfigCat.Client.IConfigCatClient.GetAllValueDetailsAsync(ConfigCat.Client.User,System.Threading.CancellationToken)">
+            <summary>
+            Returns the values along with evaluation details of all feature flags and settings asynchronously.
+            </summary>
+            <param name="user">The User Object to use for evaluating targeting rules and percentage options.</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+            <returns>A task that represents the asynchronous operation. The task result contains the list of values along with evaluation details.</returns>
+        </member>
+        <member name="M:ConfigCat.Client.IConfigCatClient.GetKeyAndValue``1(System.String)">
+            <summary>
+            Returns the key of a feature flag or setting and its value identified by the given Variation ID (analytics) synchronously.
+            </summary>
+            <remarks>
+                <para>
+            Please be aware that calling this method on a thread pool thread or the main UI thread is safe only when the client is set up to use Auto or Manual Polling and in-memory caching.
+            Otherwise execution may involve I/O-bound (e.g. network) operations, because of which the executing thread may be blocked for a longer period of time. This can result in an unresponsive application.
+            In the case of problematic setups, it is recommended to use either the async version of the method or snaphots (see <see cref="M:ConfigCat.Client.IConfigCatClient.Snapshot" />).
+            </para>
+            </remarks>
+            <typeparam name="T">
+            The type of the value. Only the following types are allowed:
+            <see cref="T:System.String" />, <see cref="T:System.Boolean" />, <see cref="T:System.Int32" />, <see cref="T:System.Int64" />, <see cref="T:System.Double" /> and <see cref="T:System.Object" /> (both nullable and non-nullable).<br />
+            The type must correspond to the setting type, otherwise <see langword="null" /> will be returned.
+            </typeparam>
+            <param name="variationId">The Variation ID.</param>
+            <returns>The key of the feature flag or setting and its value.</returns>
+            <exception cref="T:System.ArgumentNullException">
+                <paramref name="variationId" /> is <see langword="null" />.</exception>
+            <exception cref="T:System.ArgumentException">
+                <paramref name="variationId" /> is an empty string.</exception>
+            <exception cref="T:System.ArgumentException">
+                <typeparamref name="T" /> is not an allowed type.</exception>
+        </member>
+        <member name="M:ConfigCat.Client.IConfigCatClient.GetKeyAndValueAsync``1(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Returns the key of a feature flag or setting and its value identified by the given Variation ID (analytics) asynchronously.
+            </summary>
+            <typeparam name="T">
+            The type of the value. Only the following types are allowed:
+            <see cref="T:System.String" />, <see cref="T:System.Boolean" />, <see cref="T:System.Int32" />, <see cref="T:System.Int64" />, <see cref="T:System.Double" /> and <see cref="T:System.Object" /> (both nullable and non-nullable).<br />
+            The type must correspond to the setting type, otherwise <see langword="null" /> will be returned.
+            </typeparam>
+            <param name="variationId">The Variation ID.</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+            <returns>A task that represents the asynchronous operation. The task result contains the key of the feature flag or setting and its value.</returns>
+            <exception cref="T:System.ArgumentNullException">
+                <paramref name="variationId" /> is <see langword="null" />.</exception>
+            <exception cref="T:System.ArgumentException">
+                <paramref name="variationId" /> is an empty string.</exception>
+            <exception cref="T:System.ArgumentException">
+                <typeparamref name="T" /> is not an allowed type.</exception>
+            <exception cref="T:System.OperationCanceledException">
+                <paramref name="cancellationToken" /> is canceled during the execution of the task.</exception>
+        </member>
+        <member name="M:ConfigCat.Client.IConfigCatClient.ForceRefresh">
+            <summary>
+            Refreshes the locally cached config by fetching the latest version from the remote server synchronously.
+            </summary>
+            <remarks>
+                <para>
+            Please be aware that calling this method on a thread pool thread or the main UI thread is not safe as
+            execution involves I/O-bound (e.g. network) operations, because of which the executing thread may be blocked for a longer period of time. This can result in an unresponsive application.
+            In the case of problematic setups, it is recommended to either use the async version of the method or call the method on a dedicated background thread.
+            </para>
+            </remarks>
+            <returns>The refresh result.</returns>
+        </member>
+        <member name="M:ConfigCat.Client.IConfigCatClient.ForceRefreshAsync(System.Threading.CancellationToken)">
+            <summary>
+            Refreshes the locally cached config by fetching the latest version from the remote server asynchronously.
+            </summary>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+            <returns>A task that represents the asynchronous operation. The task result contains the refresh result.</returns>
+        </member>
+        <member name="M:ConfigCat.Client.IConfigCatClient.WaitForReadyAsync(System.Threading.CancellationToken)">
+            <summary>
+            Waits for the client to initialize (i.e. to raise the <see cref="E:ConfigCat.Client.IProvidesHooks.ClientReady" /> event).
+            </summary>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+            <returns>A task that represents the asynchronous operation. The task result contains the state of the local cache at the time the initialization was completed.</returns>
+        </member>
+        <member name="M:ConfigCat.Client.IConfigCatClient.Snapshot">
+            <summary>
+            Captures the current state of the client.
+            The resulting snapshot can be used to evaluate feature flags and settings based on the captured state synchronously,
+            without any underlying I/O-bound operations, which could block the executing thread for a longer period of time.
+            </summary>
+            <remarks>
+            The operation captures the in-memory stored config data. It does not attempt to update it by contacting the remote server.
+            It does not synchronize with the user-provided custom cache (see <see cref="P:ConfigCat.Client.Configuration.ConfigCatClientOptions.ConfigCache" />) either.<br />
+            Therefore, it is recommended to use snapshots in conjunction with the Auto Polling mode, where the SDK automatically updates the local cache in the background.<br />
+            For other polling modes, you'll need to manually initiate a cache refresh by invoking <see cref="M:ConfigCat.Client.IConfigCatClient.ForceRefresh" /> or <see cref="M:ConfigCat.Client.IConfigCatClient.ForceRefreshAsync(System.Threading.CancellationToken)" />.
+            </remarks>
+            <returns>The snapshot object.</returns>
+        </member>
+        <member name="M:ConfigCat.Client.IConfigCatClient.SetDefaultUser(ConfigCat.Client.User)">
+            <summary>
+            Sets the default user.
+            </summary>
+            <param name="user">The default User Object to use for evaluating targeting rules and percentage options.</param>
+        </member>
+        <member name="M:ConfigCat.Client.IConfigCatClient.ClearDefaultUser">
+            <summary>
+            Clears the default user.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.IConfigCatClient.IsOffline">
+            <summary>
+            Returns <see langword="true" /> when the client is configured not to initiate HTTP requests, otherwise <see langword="false" />.
+            </summary>
+        </member>
+        <member name="M:ConfigCat.Client.IConfigCatClient.SetOnline">
+            <summary>
+            Configures the client to allow HTTP requests.
+            </summary>
+        </member>
+        <member name="M:ConfigCat.Client.IConfigCatClient.SetOffline">
+            <summary>
+            Configures the client to not initiate HTTP requests and work using the locally cached config only.
+            </summary>
+        </member>
+        <member name="T:ConfigCat.Client.IConfigCatClientSnapshot">
+            <summary>
+            Defines the public interface of the <see cref="T:ConfigCat.Client.ConfigCatClientSnapshot" /> struct.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.IConfigCatClientSnapshot.CacheState">
+            <summary>
+            The state of the local cache at the time the snapshot was created.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.IConfigCatClientSnapshot.FetchedConfig">
+            <summary>
+            The latest config which has been fetched from the remote server.
+            </summary>
+        </member>
+        <member name="M:ConfigCat.Client.IConfigCatClientSnapshot.GetAllKeys">
+            <summary>
+            Returns the available setting keys.
+            </summary>
+            <remarks>
+            In case the client is configured to use flag override, this will also include the keys provided by the flag override.
+            </remarks>
+            <returns>The collection of keys.</returns>
+        </member>
+        <member name="M:ConfigCat.Client.IConfigCatClientSnapshot.GetValue``1(System.String,``0,ConfigCat.Client.User)">
+            <summary>
+            Returns the value of a feature flag or setting identified by <paramref name="key" /> synchronously, based on the snapshot.
+            </summary>
+            <remarks>
+            It is important to provide an argument for the <paramref name="defaultValue" /> parameter, specifically for the <typeparamref name="T" /> generic type parameter,
+            that matches the type of the feature flag or setting you are evaluating.<br />
+            Please refer to <see href="https://configcat.com/docs/sdk-reference/dotnet/#setting-type-mapping">this table</see> for the corresponding types.
+            </remarks>
+            <typeparam name="T">
+            The type of the value. Only the following types are allowed:
+            <see cref="T:System.String" />, <see cref="T:System.Boolean" />, <see cref="T:System.Int32" />, <see cref="T:System.Int64" />, <see cref="T:System.Double" /> and <see cref="T:System.Object" /> (both nullable and non-nullable).<br />
+            The type must correspond to the setting type, otherwise <paramref name="defaultValue" /> will be returned.
+            </typeparam>
+            <param name="key">Key of the feature flag or setting.</param>
+            <param name="defaultValue">In case of failure, this value will be returned.</param>
+            <param name="user">The User Object to use for evaluating targeting rules and percentage options.</param>
+            <returns>The value of the feature flag or setting.</returns>
+            <exception cref="T:System.ArgumentNullException">
+                <paramref name="key" /> is <see langword="null" />.</exception>
+            <exception cref="T:System.ArgumentException">
+                <paramref name="key" /> is an empty string.</exception>
+            <exception cref="T:System.ArgumentException">
+                <typeparamref name="T" /> is not an allowed type.</exception>
+        </member>
+        <member name="M:ConfigCat.Client.IConfigCatClientSnapshot.GetValueDetails``1(System.String,``0,ConfigCat.Client.User)">
+            <summary>
+            Returns the value along with evaluation details of a feature flag or setting identified by <paramref name="key" /> synchronously, based on the snapshot.
+            </summary>
+            <remarks>
+            It is important to provide an argument for the <paramref name="defaultValue" /> parameter, specifically for the <typeparamref name="T" /> generic type parameter,
+            that matches the type of the feature flag or setting you are evaluating.<br />
+            Please refer to <see href="https://configcat.com/docs/sdk-reference/dotnet/#setting-type-mapping">this table</see> for the corresponding types.
+            </remarks>
+            <typeparam name="T">
+            The type of the value. Only the following types are allowed:
+            <see cref="T:System.String" />, <see cref="T:System.Boolean" />, <see cref="T:System.Int32" />, <see cref="T:System.Int64" />, <see cref="T:System.Double" /> and <see cref="T:System.Object" /> (both nullable and non-nullable).<br />
+            The type must correspond to the setting type, otherwise <paramref name="defaultValue" /> will be returned.
+            </typeparam>
+            <param name="key">Key of the feature flag or setting.</param>
+            <param name="defaultValue">In case of failure, this value will be returned.</param>
+            <param name="user">The User Object to use for evaluating targeting rules and percentage options.</param>
+            <returns>The value along with the details of evaluation of the feature flag or setting.</returns>
+            <exception cref="T:System.ArgumentNullException">
+                <paramref name="key" /> is <see langword="null" />.</exception>
+            <exception cref="T:System.ArgumentException">
+                <paramref name="key" /> is an empty string.</exception>
+            <exception cref="T:System.ArgumentException">
+                <typeparamref name="T" /> is not an allowed type.</exception>
+        </member>
+        <member name="M:ConfigCat.Client.IConfigCatClientSnapshot.GetKeyAndValue``1(System.String)">
+            <summary>
+            Returns the key of a feature flag or setting and its value identified by the given Variation ID (analytics) synchronously, based on the snapshot.
+            </summary>
+            <typeparam name="T">
+            The type of the value. Only the following types are allowed:
+            <see cref="T:System.String" />, <see cref="T:System.Boolean" />, <see cref="T:System.Int32" />, <see cref="T:System.Int64" />, <see cref="T:System.Double" /> and <see cref="T:System.Object" /> (both nullable and non-nullable).<br />
+            The type must correspond to the setting type, otherwise <see langword="null" /> will be returned.
+            </typeparam>
+            <param name="variationId">The Variation ID.</param>
+            <returns>The key of the feature flag or setting and its value.</returns>
+            <exception cref="T:System.ArgumentNullException">
+                <paramref name="variationId" /> is <see langword="null" />.</exception>
+            <exception cref="T:System.ArgumentException">
+                <paramref name="variationId" /> is an empty string.</exception>
+            <exception cref="T:System.ArgumentException">
+                <typeparamref name="T" /> is not an allowed type.</exception>
+        </member>
+        <member name="T:ConfigCat.Client.ConsoleLogger">
+            <summary>
+            An implementation of <see cref="T:ConfigCat.Client.IConfigCatLogger" /> which writes log messages into <see cref="T:System.Console" />.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.ConsoleLogger.LogLevel">
+            <summary>
+            Gets or sets the log level (the minimum level to use for filtering log events).
+            </summary>
+        </member>
+        <member name="M:ConfigCat.Client.ConsoleLogger.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:ConfigCat.Client.ConsoleLogger" /> class with <see cref="F:ConfigCat.Client.LogLevel.Warning" />.
+            </summary>
+        </member>
+        <member name="M:ConfigCat.Client.ConsoleLogger.#ctor(ConfigCat.Client.LogLevel)">
+            <summary>
+            Initializes a new instance of the <see cref="T:ConfigCat.Client.ConsoleLogger" /> class with the specified log level.
+            </summary>
+            <param name="logLevel">Log level (the minimum level to use for filtering log events).</param>
+        </member>
+        <member name="M:ConfigCat.Client.ConsoleLogger.Log(ConfigCat.Client.LogLevel,ConfigCat.Client.LogEventId,ConfigCat.Client.FormattableLogMessage@,System.Exception)">
+            <summary>
+            Writes an event into the log.
+            </summary>
+            <param name="level">Event severity level.</param>
+            <param name="eventId">Event identifier.</param>
+            <param name="message">Message.</param>
+            <param name="exception">The <see cref="T:System.Exception" /> object related to the message (if any).</param>
+        </member>
+        <member name="T:ConfigCat.Client.FormattableLogMessage">
+            <summary>
+            Represents a plain log message or a log message format with named arguments.
+            </summary>
+        </member>
+        <member name="M:ConfigCat.Client.FormattableLogMessage.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:ConfigCat.Client.FormattableLogMessage" /> struct from a plain log message.
+            </summary>
+        </member>
+        <member name="M:ConfigCat.Client.FormattableLogMessage.#ctor(System.String,System.String[],System.Object[])">
+            <summary>
+            Initializes a new instance of the <see cref="T:ConfigCat.Client.FormattableLogMessage" /> struct from a log message format and the corresponding named arguments.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.FormattableLogMessage.Format">
+            <summary>
+            Log message format.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.FormattableLogMessage.ArgNames">
+            <summary>
+            Names of the named arguments.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.FormattableLogMessage.ArgValues">
+            <summary>
+            Values of the named arguments.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.FormattableLogMessage.InvariantFormattedMessage">
+            <summary>
+            The log message formatted using <see cref="P:System.Globalization.CultureInfo.InvariantCulture" />.
+            </summary>
+        </member>
+        <member name="M:ConfigCat.Client.FormattableLogMessage.ToString">
+            <summary>
+            Returns the log message formatted using <see cref="P:System.Globalization.CultureInfo.CurrentCulture" />.
+            </summary>
+        </member>
+        <member name="M:ConfigCat.Client.FormattableLogMessage.ToString(System.IFormatProvider)">
+            <summary>
+            Returns the log message formatted using the specified <paramref name="formatProvider" />.
+            </summary>
+        </member>
+        <member name="M:ConfigCat.Client.FormattableLogMessage.ToString(System.String,System.IFormatProvider)" />
+        <member name="T:ConfigCat.Client.LogFilterCallback">
+            <summary>
+            Represents a method that is called by the SDK to decide whether a log event should be logged.
+            </summary>
+            <param name="level">Event severity level.</param>
+            <param name="eventId">Event identifier.</param>
+            <param name="message">Message.</param>
+            <param name="exception">The <see cref="T:System.Exception" /> object related to the message (if any).</param>
+            <returns>
+                <see langword="true" /> when the event should be logged, <see langword="false" /> when it should be skipped.</returns>
+        </member>
+        <member name="T:ConfigCat.Client.IConfigCatLogger">
+            <summary>
+            Defines the interface used by the ConfigCat SDK to perform logging.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.IConfigCatLogger.LogLevel">
+            <summary>
+            Gets or sets the log level (the minimum level to use for filtering log events).
+            </summary>
+        </member>
+        <member name="M:ConfigCat.Client.IConfigCatLogger.Log(ConfigCat.Client.LogLevel,ConfigCat.Client.LogEventId,ConfigCat.Client.FormattableLogMessage@,System.Exception)">
+            <summary>
+            Writes an event into the log.
+            </summary>
+            <param name="level">Event severity level.</param>
+            <param name="eventId">Event identifier.</param>
+            <param name="message">Message.</param>
+            <param name="exception">The <see cref="T:System.Exception" /> object related to the message (if any).</param>
+        </member>
+        <member name="T:ConfigCat.Client.LogEventId">
+            <summary>
+            Log event identifier.
+            </summary>
+        </member>
+        <member name="M:ConfigCat.Client.LogEventId.op_Implicit(System.Int32)~ConfigCat.Client.LogEventId">
+            <summary>
+            Implicitly converts the given <see cref="T:System.Int32" /> value to an <see cref="T:ConfigCat.Client.LogEventId" />.
+            </summary>
+            <param name="id">The <see cref="T:System.Int32" /> value.</param>
+        </member>
+        <member name="M:ConfigCat.Client.LogEventId.op_Equality(ConfigCat.Client.LogEventId,ConfigCat.Client.LogEventId)">
+            <summary>
+            Checks if two specified <see cref="T:ConfigCat.Client.LogEventId" /> instances have the same value. They are equal if they have the same Id.
+            </summary>
+        </member>
+        <member name="M:ConfigCat.Client.LogEventId.op_Inequality(ConfigCat.Client.LogEventId,ConfigCat.Client.LogEventId)">
+            <summary>
+            Checks if two specified <see cref="T:ConfigCat.Client.LogEventId" /> instances have different values.
+            </summary>
+        </member>
+        <member name="M:ConfigCat.Client.LogEventId.#ctor(System.Int32)">
+            <summary>
+            Initializes a new instance of the <see cref="T:ConfigCat.Client.LogEventId" /> struct.
+            </summary>
+            <param name="id">The numeric identifier for the event.</param>
+        </member>
+        <member name="P:ConfigCat.Client.LogEventId.Id">
+            <summary>
+            Gets the numeric identifier for this event.
+            </summary>
+        </member>
+        <member name="M:ConfigCat.Client.LogEventId.ToString" />
+        <member name="M:ConfigCat.Client.LogEventId.Equals(ConfigCat.Client.LogEventId)" />
+        <member name="M:ConfigCat.Client.LogEventId.Equals(System.Object)" />
+        <member name="M:ConfigCat.Client.LogEventId.GetHashCode" />
+        <member name="T:ConfigCat.Client.LoggerExtensions" />
+        <member name="M:ConfigCat.Client.LoggerExtensions.Debug(ConfigCat.Client.LoggerWrapper,System.String)">
+            <summary>
+            Shorthand method for
+            <code>logger.Log(LogLevel.Debug, default, message);</code></summary>
+        </member>
+        <member name="T:ConfigCat.Client.LoggerWrapper" />
+        <member name="M:ConfigCat.Client.LoggerWrapper.Log(ConfigCat.Client.LogLevel,ConfigCat.Client.LogEventId,ConfigCat.Client.FormattableLogMessage@,System.Exception)">
+            <summary>
+            Writes an event into the log.
+            </summary>
+            <param name="level">Event severity level.</param>
+            <param name="eventId">Event identifier.</param>
+            <param name="message">Message.</param>
+            <param name="exception">The <see cref="T:System.Exception" /> object related to the message (if any).</param>
+        </member>
+        <member name="T:ConfigCat.Client.LogLevel">
+            <summary>
+            Specifies event severity levels for the <see cref="T:ConfigCat.Client.IConfigCatLogger" /> interface.
+            The levels are interpreted as minimum levels in the case of event filtering.
+            </summary>
+            <remarks>
+            Debug &gt; Info &gt; Warning &gt; Error &gt; Off
+            </remarks>
+        </member>
+        <member name="F:ConfigCat.Client.LogLevel.Off">
+            <summary>
+            No events are logged.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.LogLevel.Error">
+            <summary>
+            Error events are logged. All other events are discarded.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.LogLevel.Warning">
+            <summary>
+            Warning and Error events are logged. Information and Debug events are discarded.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.LogLevel.Info">
+            <summary>
+            Information, Warning and Error are logged. Debug events are discarded.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.LogLevel.Debug">
+            <summary>
+            All events are logged.
+            </summary>
+        </member>
+        <member name="T:ConfigCat.Client.ICondition">
+            <summary>
+            Represents a condition.
+            Can be one of the following types: <see cref="T:ConfigCat.Client.IUserCondition" />, <see cref="T:ConfigCat.Client.ISegmentCondition" /> or <see cref="T:ConfigCat.Client.IPrerequisiteFlagCondition" />.
+            </summary>
+        </member>
+        <member name="T:ConfigCat.Client.IConfig">
+            <summary>
+            Details of a ConfigCat config.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.IConfig.Salt">
+            <summary>
+            The salt that was used to hash sensitive comparison values.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.IConfig.Segments">
+            <summary>
+            The list of segments.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.IConfig.Settings">
+            <summary>
+            The dictionary of settings.
+            </summary>
+        </member>
+        <member name="T:ConfigCat.Client.IPercentageOption">
+            <summary>
+            Represents a percentage option.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.IPercentageOption.Percentage">
+            <summary>
+            A number between 0 and 100 that represents a randomly allocated fraction of the users.
+            </summary>
+        </member>
+        <member name="T:ConfigCat.Client.PrerequisiteFlagComparator">
+            <summary>
+            Prerequisite flag comparison operator used during the evaluation process.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.PrerequisiteFlagComparator.Equals">
+            <summary>
+            EQUALS - Checks whether the evaluated value of the specified prerequisite flag is equal to the comparison value.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.PrerequisiteFlagComparator.NotEquals">
+            <summary>
+            NOT EQUALS - Checks whether the evaluated value of the specified prerequisite flag is not equal to the comparison value.
+            </summary>
+        </member>
+        <member name="T:ConfigCat.Client.IPrerequisiteFlagCondition">
+            <summary>
+            Describes a condition that is based on a prerequisite flag.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.IPrerequisiteFlagCondition.PrerequisiteFlagKey">
+            <summary>
+            The key of the prerequisite flag that the condition is based on.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.IPrerequisiteFlagCondition.Comparator">
+            <summary>
+            The operator which defines the relation between the evaluated value of the prerequisite flag and the comparison value.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.IPrerequisiteFlagCondition.ComparisonValue">
+            <summary>
+            The value that the evaluated value of the prerequisite flag is compared to.
+            Can be a value of the following types: <see cref="T:System.Boolean" />, <see cref="T:System.String" />, <see cref="T:System.Int32" /> or <see cref="T:System.Double" />.
+            </summary>
+        </member>
+        <member name="T:ConfigCat.Client.ISegment">
+            <summary>
+            Describes a segment.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.ISegment.Name">
+            <summary>
+            The name of the segment.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.ISegment.Conditions">
+            <summary>
+            The list of segment rule conditions (where there is a logical AND relation between the items).
+            </summary>
+        </member>
+        <member name="T:ConfigCat.Client.SegmentComparator">
+            <summary>
+            Segment comparison operator used during the evaluation process.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.SegmentComparator.IsIn">
+            <summary>
+            IS IN SEGMENT - Checks whether the conditions of the specified segment are evaluated to true.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.SegmentComparator.IsNotIn">
+            <summary>
+            IS NOT IN SEGMENT - Checks whether the conditions of the specified segment are evaluated to false.
+            </summary>
+        </member>
+        <member name="T:ConfigCat.Client.ISegmentCondition">
+            <summary>
+            Describes a condition that is based on a segment.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.ISegmentCondition.Segment">
+            <summary>
+            The segment that the condition is based on.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.ISegmentCondition.Comparator">
+            <summary>
+            The operator which defines the expected result of the evaluation of the segment.
+            </summary>
+        </member>
+        <member name="T:ConfigCat.Client.ISetting">
+            <summary>
+            Feature flag or setting.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.ISetting.SettingType">
+            <summary>
+            Setting type.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.ISetting.PercentageOptionsAttribute">
+            <summary>
+            The User Object attribute which serves as the basis of percentage options evaluation.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.ISetting.TargetingRules">
+            <summary>
+            The list of targeting rules (where there is a logical OR relation between the items).
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.ISetting.PercentageOptions">
+            <summary>
+            The list of percentage options.
+            </summary>
+        </member>
+        <member name="T:ConfigCat.Client.SettingType">
+            <summary>
+            Setting type.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.SettingType.Boolean">
+            <summary>
+            On/off type (feature flag).
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.SettingType.String">
+            <summary>
+            Text type.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.SettingType.Int">
+            <summary>
+            Whole number type.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.SettingType.Double">
+            <summary>
+            Decimal number type.
+            </summary>
+        </member>
+        <member name="T:ConfigCat.Client.ISettingValueContainer">
+            <summary>
+            A model object which contains a setting value along with related data.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.ISettingValueContainer.Value">
+            <summary>
+            Setting value.
+            Can be a value of the following types: <see cref="T:System.Boolean" />, <see cref="T:System.String" />, <see cref="T:System.Int32" /> or <see cref="T:System.Double" />.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.ISettingValueContainer.VariationId">
+            <summary>
+            Variation ID.
+            </summary>
+        </member>
+        <member name="T:ConfigCat.Client.ITargetingRule">
+            <summary>
+            Describes a targeting rule.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.ITargetingRule.Conditions">
+            <summary>
+            The list of conditions that are combined with the AND logical operator.
+            Items can be one of the following types: <see cref="T:ConfigCat.Client.IUserCondition" />, <see cref="T:ConfigCat.Client.ISegmentCondition" /> or <see cref="T:ConfigCat.Client.IPrerequisiteFlagCondition" />.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.ITargetingRule.PercentageOptions">
+            <summary>
+            The list of percentage options associated with the targeting rule or <see langword="null" /> if the targeting rule has a simple value THEN part.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.ITargetingRule.SimpleValue">
+            <summary>
+            The simple value associated with the targeting rule or <see langword="null" /> if the targeting rule has percentage options THEN part.
+            </summary>
+        </member>
+        <member name="T:ConfigCat.Client.UserComparator">
+            <summary>
+            User Object attribute comparison operator used during the evaluation process.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.UserComparator.TextIsOneOf">
+            <summary>
+            IS ONE OF (cleartext) - Checks whether the comparison attribute is equal to any of the comparison values.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.UserComparator.TextIsNotOneOf">
+            <summary>
+            IS NOT ONE OF (cleartext) - Checks whether the comparison attribute is not equal to any of the comparison values.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.UserComparator.TextContainsAnyOf">
+            <summary>
+            CONTAINS ANY OF (cleartext) - Checks whether the comparison attribute contains any comparison values as a substring.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.UserComparator.TextNotContainsAnyOf">
+            <summary>
+            NOT CONTAINS ANY OF (cleartext) - Checks whether the comparison attribute does not contain any comparison values as a substring.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.UserComparator.SemVerIsOneOf">
+            <summary>
+            IS ONE OF (semver) - Checks whether the comparison attribute interpreted as a semantic version is equal to any of the comparison values.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.UserComparator.SemVerIsNotOneOf">
+            <summary>
+            IS NOT ONE OF (semver) - Checks whether the comparison attribute interpreted as a semantic version is not equal to any of the comparison values.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.UserComparator.SemVerLess">
+            <summary>
+            &lt; (semver) - Checks whether the comparison attribute interpreted as a semantic version is less than the comparison value.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.UserComparator.SemVerLessOrEquals">
+            <summary>
+            &lt;= (semver) - Checks whether the comparison attribute interpreted as a semantic version is less than or equal to the comparison value.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.UserComparator.SemVerGreater">
+            <summary>
+            &gt; (semver) - Checks whether the comparison attribute interpreted as a semantic version is greater than the comparison value.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.UserComparator.SemVerGreaterOrEquals">
+            <summary>
+            &gt;= (semver) - Checks whether the comparison attribute interpreted as a semantic version is greater than or equal to the comparison value.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.UserComparator.NumberEquals">
+            <summary>
+            = (number) - Checks whether the comparison attribute interpreted as a decimal number is equal to the comparison value.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.UserComparator.NumberNotEquals">
+            <summary>
+            != (number) - Checks whether the comparison attribute interpreted as a decimal number is not equal to the comparison value.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.UserComparator.NumberLess">
+            <summary>
+            &lt; (number) - Checks whether the comparison attribute interpreted as a decimal number is less than the comparison value.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.UserComparator.NumberLessOrEquals">
+            <summary>
+            &lt;= (number) - Checks whether the comparison attribute interpreted as a decimal number is less than or equal to the comparison value.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.UserComparator.NumberGreater">
+            <summary>
+            &gt; (number) - Checks whether the comparison attribute interpreted as a decimal number is greater than the comparison value.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.UserComparator.NumberGreaterOrEquals">
+            <summary>
+            &gt;= (number) - Checks whether the comparison attribute interpreted as a decimal number is greater than or equal to the comparison value.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.UserComparator.SensitiveTextIsOneOf">
+            <summary>
+            IS ONE OF (hashed) - Checks whether the comparison attribute is equal to any of the comparison values (where the comparison is performed using the salted SHA256 hashes of the values).
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.UserComparator.SensitiveTextIsNotOneOf">
+            <summary>
+            IS NOT ONE OF (hashed) - Checks whether the comparison attribute is not equal to any of the comparison values (where the comparison is performed using the salted SHA256 hashes of the values).
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.UserComparator.DateTimeBefore">
+            <summary>
+            BEFORE (UTC datetime) - Checks whether the comparison attribute interpreted as the seconds elapsed since <see href="https://en.wikipedia.org/wiki/Unix_time">Unix Epoch</see> is less than the comparison value.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.UserComparator.DateTimeAfter">
+            <summary>
+            AFTER (UTC datetime) - Checks whether the comparison attribute interpreted as the seconds elapsed since <see href="https://en.wikipedia.org/wiki/Unix_time">Unix Epoch</see> is greater than the comparison value.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.UserComparator.SensitiveTextEquals">
+            <summary>
+            EQUALS (hashed) - Checks whether the comparison attribute is equal to the comparison value (where the comparison is performed using the salted SHA256 hashes of the values).
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.UserComparator.SensitiveTextNotEquals">
+            <summary>
+            NOT EQUALS (hashed) - Checks whether the comparison attribute is not equal to the comparison value (where the comparison is performed using the salted SHA256 hashes of the values).
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.UserComparator.SensitiveTextStartsWithAnyOf">
+            <summary>
+            STARTS WITH ANY OF (hashed) - Checks whether the comparison attribute starts with any of the comparison values (where the comparison is performed using the salted SHA256 hashes of the values).
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.UserComparator.SensitiveTextNotStartsWithAnyOf">
+            <summary>
+            NOT STARTS WITH ANY OF (hashed) - Checks whether the comparison attribute does not start with any of the comparison values (where the comparison is performed using the salted SHA256 hashes of the values).
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.UserComparator.SensitiveTextEndsWithAnyOf">
+            <summary>
+            ENDS WITH ANY OF (hashed) - Checks whether the comparison attribute ends with any of the comparison values (where the comparison is performed using the salted SHA256 hashes of the values).
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.UserComparator.SensitiveTextNotEndsWithAnyOf">
+            <summary>
+            NOT ENDS WITH ANY OF (hashed) - Checks whether the comparison attribute does not end with any of the comparison values (where the comparison is performed using the salted SHA256 hashes of the values).
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.UserComparator.SensitiveArrayContainsAnyOf">
+            <summary>
+            ARRAY CONTAINS ANY OF (hashed) - Checks whether the comparison attribute interpreted as a comma-separated list contains any of the comparison values (where the comparison is performed using the salted SHA256 hashes of the values).
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.UserComparator.SensitiveArrayNotContainsAnyOf">
+            <summary>
+            ARRAY NOT CONTAINS ANY OF (hashed) - Checks whether the comparison attribute interpreted as a comma-separated list does not contain any of the comparison values (where the comparison is performed using the salted SHA256 hashes of the values).
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.UserComparator.TextEquals">
+            <summary>
+            EQUALS (cleartext) - Checks whether the comparison attribute is equal to the comparison value.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.UserComparator.TextNotEquals">
+            <summary>
+            NOT EQUALS (cleartext) - Checks whether the comparison attribute is not equal to the comparison value.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.UserComparator.TextStartsWithAnyOf">
+            <summary>
+            STARTS WITH ANY OF (cleartext) - Checks whether the comparison attribute starts with any of the comparison values.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.UserComparator.TextNotStartsWithAnyOf">
+            <summary>
+            NOT STARTS WITH ANY OF (cleartext) - Checks whether the comparison attribute does not start with any of the comparison values.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.UserComparator.TextEndsWithAnyOf">
+            <summary>
+            ENDS WITH ANY OF (cleartext) - Checks whether the comparison attribute ends with any of the comparison values.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.UserComparator.TextNotEndsWithAnyOf">
+            <summary>
+            NOT ENDS WITH ANY OF (cleartext) - Checks whether the comparison attribute does not end with any of the comparison values.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.UserComparator.ArrayContainsAnyOf">
+            <summary>
+            ARRAY CONTAINS ANY OF (cleartext) - Checks whether the comparison attribute interpreted as a comma-separated list contains any of the comparison values.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.UserComparator.ArrayNotContainsAnyOf">
+            <summary>
+            ARRAY NOT CONTAINS ANY OF (cleartext) - Checks whether the comparison attribute interpreted as a comma-separated list does not contain any of the comparison values.
+            </summary>
+        </member>
+        <member name="T:ConfigCat.Client.IUserCondition">
+            <summary>
+            Describes a condition that is based on a User Object attribute.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.IUserCondition.ComparisonAttribute">
+            <summary>
+            The User Object attribute that the condition is based on. Can be "Identifier", "Email", "Country" or any custom attribute.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.IUserCondition.Comparator">
+            <summary>
+            The operator which defines the relation between the comparison attribute and the comparison value.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.IUserCondition.ComparisonValue">
+            <summary>
+            The value that the User Object attribute is compared to.
+            Can be a value of the following types: <see cref="T:System.String" /> (including a semantic version), <see cref="T:System.Double" /> or <see cref="T:System.Collections.Generic.IReadOnlyList`1" /> where T is <see cref="T:System.String" />.
+            </summary>
+        </member>
+        <member name="T:ConfigCat.Client.FlagOverrides">
+            <summary>
+            Represents a flag override along with its settings. Also provides static factory methods for defining flag overrides.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.FlagOverrides.OverrideBehaviour">
+            <summary>
+            The override behaviour.
+            </summary>
+        </member>
+        <member name="M:ConfigCat.Client.FlagOverrides.LocalFile(System.String,System.Boolean,ConfigCat.Client.OverrideBehaviour)">
+            <summary>
+            Creates an instance of the <see cref="T:ConfigCat.Client.FlagOverrides" /> class that uses a local file data source.
+            </summary>
+            <param name="filePath">Path to the file.</param>
+            <param name="autoReload">If set to <see langword="true" />, the file will be reloaded when it gets modified.</param>
+            <param name="overrideBehaviour">The override behaviour. Specifies whether the local values should override the remote values
+            or local values should only be used when a remote value doesn't exist or the local values should be used only.</param>
+            <returns>The new <see cref="T:ConfigCat.Client.FlagOverrides" /> instance.</returns>
+            <exception cref="T:System.ArgumentNullException">
+                <paramref name="filePath" /> is <see langword="null" />.</exception>
+        </member>
+        <member name="M:ConfigCat.Client.FlagOverrides.LocalDictionary(System.Collections.Generic.IDictionary{System.String,System.Object},ConfigCat.Client.OverrideBehaviour)">
+            <summary>
+            Creates an instance of the <see cref="T:ConfigCat.Client.FlagOverrides" /> class that uses a dictionary data source.
+            </summary>
+            <param name="dictionary">The dictionary that contains the overrides.</param>
+            <param name="overrideBehaviour">The override behaviour. Specifies whether the local values should override the remote values
+            or local values should only be used when a remote value doesn't exist or the local values should be used only.</param>
+            <returns>The new <see cref="T:ConfigCat.Client.FlagOverrides" /> instance.</returns>
+            <exception cref="T:System.ArgumentNullException">
+                <paramref name="dictionary" /> is <see langword="null" />.</exception>
+        </member>
+        <member name="M:ConfigCat.Client.FlagOverrides.LocalDictionary(System.Collections.Generic.IDictionary{System.String,System.Object},System.Boolean,ConfigCat.Client.OverrideBehaviour)">
+            <summary>
+            Creates an instance of the <see cref="T:ConfigCat.Client.FlagOverrides" /> class that uses a dictionary data source.
+            </summary>
+            <param name="dictionary">The dictionary that contains the overrides.</param>
+            <param name="watchChanges">If set to <see langword="true" />, the input dictionary will be tracked for changes.</param>
+            <param name="overrideBehaviour">The override behaviour. Specifies whether the local values should override the remote values
+            or local values should only be used when a remote value doesn't exist or the local values should be used only.</param>
+            <returns>The new <see cref="T:ConfigCat.Client.FlagOverrides" /> instance.</returns>
+            <exception cref="T:System.ArgumentNullException">
+                <paramref name="dictionary" /> is <see langword="null" />.</exception>
+        </member>
+        <member name="T:ConfigCat.Client.OverrideBehaviour">
+            <summary>
+            Specifies the behaviours for flag overrides.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.OverrideBehaviour.LocalOnly">
+            <summary>
+            When evaluating values, the SDK will not use feature flags and settings from the ConfigCat CDN, but it will use
+            all feature flags and settings that are loaded from local-override sources.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.OverrideBehaviour.LocalOverRemote">
+            <summary>
+            When evaluating values, the SDK will use all feature flags and settings that are downloaded from the ConfigCat CDN,
+            plus all feature flags and settings that are loaded from local-override sources. If a feature flag or a setting is
+            defined both in the fetched and the local-override source then the local-override version will take precedence.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.OverrideBehaviour.RemoteOverLocal">
+            <summary>
+            When evaluating values, the SDK will use all feature flags and settings that are downloaded from the ConfigCat CDN,
+            plus all feature flags and settings that are loaded from local-override sources. If a feature flag or a setting is
+            defined both in the fetched and the local-override source then the fetched version will take precedence.
+            </summary>
+        </member>
+        <member name="T:ConfigCat.Client.RefreshErrorCode">
+            <summary>
+            Specifies the possible config data refresh error codes.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.RefreshErrorCode.UnexpectedError">
+            <summary>
+            An unexpected error occurred during the refresh operation.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.RefreshErrorCode.None">
+            <summary>
+            No error occurred (the refresh operation was successful).
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.RefreshErrorCode.LocalOnlyClient">
+            <summary>
+            The refresh operation failed because the client is configured to use the <see cref="F:ConfigCat.Client.OverrideBehaviour.LocalOnly" /> override behavior,
+            which prevents making HTTP requests.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.RefreshErrorCode.OfflineClient">
+            <summary>
+            The refresh operation failed because the client is in offline mode, it cannot initiate HTTP requests.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.RefreshErrorCode.InvalidSdkKey">
+            <summary>
+            The refresh operation failed because a HTTP response indicating an invalid SDK Key was received (403 Forbidden or 404 Not Found).
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.RefreshErrorCode.UnexpectedHttpResponse">
+            <summary>
+            The refresh operation failed because an invalid HTTP response was received (unexpected HTTP status code).
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.RefreshErrorCode.HttpRequestTimeout">
+            <summary>
+            The refresh operation failed because the HTTP request timed out.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.RefreshErrorCode.HttpRequestFailure">
+            <summary>
+            The refresh operation failed because the HTTP request failed (most likely, due to a local network issue).
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.RefreshErrorCode.InvalidHttpResponseContent">
+            <summary>
+            The refresh operation failed because an invalid HTTP response was received (200 OK with an invalid content).
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.RefreshErrorCode.InvalidHttpResponseWhenLocalCacheIsEmpty">
+            <summary>
+            The refresh operation failed because an invalid HTTP response was received (304 Not Modified when no config JSON was cached locally).
+            </summary>
+        </member>
+        <member name="T:ConfigCat.Client.RefreshResult">
+            <summary>
+            Contains the result of an <see cref="M:ConfigCat.Client.IConfigCatClient.ForceRefresh" /> or <see cref="M:ConfigCat.Client.IConfigCatClient.ForceRefreshAsync(System.Threading.CancellationToken)" /> operation.
+            </summary>
+        </member>
+        <member name="M:ConfigCat.Client.RefreshResult.Success">
+            <summary>
+            Creates an instance of the <see cref="T:ConfigCat.Client.RefreshResult" /> struct which indicates that the operation was successful.
+            </summary>
+            <returns>The new <see cref="T:ConfigCat.Client.RefreshResult" /> instance.</returns>
+        </member>
+        <member name="M:ConfigCat.Client.RefreshResult.Failure(ConfigCat.Client.RefreshErrorCode,System.String,System.Exception)">
+            <summary>
+            Creates an instance of the <see cref="T:ConfigCat.Client.RefreshResult" /> struct which indicates that the operation failed.
+            </summary>
+            <returns>The new <see cref="T:ConfigCat.Client.RefreshResult" /> instance.</returns>
+        </member>
+        <member name="P:ConfigCat.Client.RefreshResult.IsSuccess">
+            <summary>
+            Indicates whether the operation was successful or not.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.RefreshResult.ErrorCode">
+            <summary>
+            The code identifying the reason for the error in case the operation failed.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.RefreshResult.ErrorMessage">
+            <summary>
+            Error message in case the operation failed, otherwise <see langword="null" />.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.RefreshResult.ErrorException">
+            <summary>
+            The <see cref="T:System.Exception" /> object related to the error in case the operation failed (if any).
+            </summary>
+        </member>
+        <member name="T:ConfigCat.Client.Shims.TaskShim">
+            <summary>
+            Defines an abstraction over a few <see cref="T:System.Threading.Tasks.Task" />-related APIs used by the SDK so that
+            consumers can override their behavior in some constrained runtime environments.
+            </summary>
+        </member>
+        <member name="F:ConfigCat.Client.Shims.TaskShim.Default">
+            <summary>
+            Provides an instance of the default implementation of the <see cref="T:ConfigCat.Client.Shims.TaskShim" /> class, which just simply calls the built-in <see cref="T:System.Threading.Tasks.Task" /> methods.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.Shims.TaskShim.Current">
+            <summary>
+            Returns the currently used <see cref="T:ConfigCat.Client.Shims.TaskShim" />, configured via <see cref="T:ConfigCat.Client.Configuration.PlatformCompatibilityOptions" />.
+            </summary>
+        </member>
+        <member name="M:ConfigCat.Client.Shims.TaskShim.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:ConfigCat.Client.Shims.TaskShim" /> class.
+            </summary>
+        </member>
+        <member name="M:ConfigCat.Client.Shims.TaskShim.Run``1(System.Func{System.Threading.Tasks.Task{``0}},System.Threading.CancellationToken)" />
+        <member name="M:ConfigCat.Client.Shims.TaskShim.Delay(System.TimeSpan,System.Threading.CancellationToken)" />
+        <member name="T:ConfigCat.Client.User">
+            <summary>
+            User Object. Contains user attributes which are used for evaluating targeting rules and percentage options.
+            </summary>
+            <remarks>
+            Please note that the <see cref="T:ConfigCat.Client.User" /> class is not designed to be used as a DTO (data transfer object).
+            (Since the type of the <see cref="P:ConfigCat.Client.User.Custom" /> property is polymorphic, it's not guaranteed that deserializing a serialized instance produces an instance with an identical or even valid data content.)
+            </remarks>
+        </member>
+        <member name="P:ConfigCat.Client.User.Identifier">
+            <summary>
+            The unique identifier of the user or session (e.g. email address, primary key, session ID, etc.)
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.User.Email">
+            <summary>
+            Email address of the user.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.User.Country">
+            <summary>
+            Country of the user.
+            </summary>
+        </member>
+        <member name="P:ConfigCat.Client.User.Custom">
+            <summary>
+            Custom attributes of the user for advanced targeting rule definitions (e.g. user role, subscription type, etc.)
+            </summary>
+            <remarks>
+            All comparators support <see cref="T:System.String" /> values as User Object attribute (in some cases they need to be provided in a specific format though, see below),<br />
+            but some of them also support other types of values. It depends on the comparator how the values will be handled. The following rules apply:
+            <para>
+            Text-based comparators (EQUALS, IS ONE OF, etc.)<br />
+            * accept <see cref="T:System.String" /> values,<br />
+            * all other values are automatically converted to <see cref="T:System.String" /> (a warning will be logged but evaluation will continue as normal).
+            </para><para>
+            SemVer-based comparators (IS ONE OF, &lt;, &gt;=, etc.)<br />
+            * accept <see cref="T:System.String" /> values containing a properly formatted, valid semver value,<br />
+            * all other values are considered invalid (a warning will be logged and the currently evaluated targeting rule will be skipped).
+            </para><para>
+            Number-based comparators (=, &lt;, &gt;=, etc.)<br />
+            * accept <see cref="T:System.Double" /> values and all other numeric values which can safely be converted to <see cref="T:System.Double" />,<br />
+            * accept <see cref="T:System.String" /> values containing a properly formatted, valid <see cref="T:System.Double" /> value,<br />
+            * all other values are considered invalid (a warning will be logged and the currently evaluated targeting rule will be skipped).
+            </para><para>
+            Date time-based comparators (BEFORE / AFTER)<br />
+            * accept <see cref="T:System.DateTime" /> or <see cref="T:System.DateTimeOffset" /> values, which are automatically converted to a second-based Unix timestamp,<br />
+            * accept <see cref="T:System.Double" /> values representing a second-based Unix timestamp and all other numeric values which can safely be converted to <see cref="T:System.Double" />,<br />
+            * accept <see cref="T:System.String" /> values containing a properly formatted, valid <see cref="T:System.Double" /> value,<br />
+            * all other values are considered invalid (a warning will be logged and the currently evaluated targeting rule will be skipped).
+            </para><para>
+            String array-based comparators (ARRAY CONTAINS ANY OF / ARRAY NOT CONTAINS ANY OF)<br />
+            * accept arrays of <see cref="T:System.String" />,<br />
+            * accept <see cref="T:System.String" /> values containing a valid JSON string which can be deserialized to an array of <see cref="T:System.String" />,<br />
+            * all other values are considered invalid (a warning will be logged and the currently evaluated targeting rule will be skipped).
+            </para></remarks>
+        </member>
+        <member name="M:ConfigCat.Client.User.GetAllAttributes``1(System.Func{System.Object,``0})">
+            <summary>
+            Returns all attributes of the user.
+            </summary>
+        </member>
+        <member name="M:ConfigCat.Client.User.GetAllAttributes">
+            <summary>
+            Returns all attributes of the user.
+            </summary>
+        </member>
+        <member name="M:ConfigCat.Client.User.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:ConfigCat.Client.User" /> class.
+            </summary>
+            <param name="identifier">The unique identifier of the user or session.</param>
+        </member>
+        <member name="M:ConfigCat.Client.User.ToString" />
+        <member name="T:ConfigCat.Client.Utils.LazyString">
+            <summary>
+            Defers string formatting until the formatted value is actually needed.
+            </summary>
+            <remarks>
+            It roughly achieves what <c>new Lazy&lt;string&gt;(() =&gt; string.Format(CultureInfo.InvariantCulture, format, args), isThreadSafe: false)</c> does
+            but without extra heap memory allocations.
+            </remarks>
+        </member>
+        <member name="T:ConfigCat.Client.Versioning.IntExtensions" />
+        <member name="M:ConfigCat.Client.Versioning.IntExtensions.Digits(System.Int32)">
+            <summary>
+            The number of digits in a non-negative number. Returns 1 for all
+            negative numbers. That is ok because we are using it to calculate
+            string length for a <see cref="T:System.Text.StringBuilder" /> for numbers that
+            aren't supposed to be negative, but when they are it is just a little
+            slower.
+            </summary>
+            <remarks>
+            This approach is based on https://stackoverflow.com/a/51099524/268898
+            where the poster offers performance benchmarks showing this is the
+            fastest way to get a number of digits.
+            </remarks>
+        </member>
+        <member name="T:ConfigCat.Client.Versioning.SemVersion">
+            <summary>
+            A semantic version implementation.
+            Conforms with v2.0.0 of http://semver.org
+            </summary>
+        </member>
+        <member name="M:ConfigCat.Client.Versioning.SemVersion.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            Deserializes a <see cref="T:ConfigCat.Client.Versioning.SemVersion" />.
+            </summary>
+            <exception cref="T:System.ArgumentNullException">
+                <paramref name="info" /> is <see langword="null" />.</exception>
+        </member>
+        <member name="M:ConfigCat.Client.Versioning.SemVersion.#ctor(System.Int32,System.Int32,System.Int32,System.String,System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:ConfigCat.Client.Versioning.SemVersion" /> class.
+            </summary>
+            <param name="major">The major version.</param>
+            <param name="minor">The minor version.</param>
+            <param name="patch">The patch version.</param>
+            <param name="prerelease">The prerelease version (e.g. "alpha").</param>
+            <param name="build">The build metadata (e.g. "nightly.232").</param>
+        </member>
+        <member name="M:ConfigCat.Client.Versioning.SemVersion.#ctor(System.Version)">
+            <summary>
+            Initializes a new instance of the <see cref="T:ConfigCat.Client.Versioning.SemVersion" /> class from
+            a <see cref="T:System.Version" />.
+            </summary>
+            <param name="version">The <see cref="T:System.Version" /> that is used to initialize
+            the Major, Minor, Patch and Build.</param>
+            <returns>A <see cref="T:ConfigCat.Client.Versioning.SemVersion" /> with the same Major and Minor version.
+            The Patch version will be the fourth part of the version number. The
+            build meta data will contain the third part of the version number if
+            it is greater than zero.</returns>
+        </member>
+        <member name="M:ConfigCat.Client.Versioning.SemVersion.Parse(System.String,System.Boolean)">
+            <summary>
+            Converts the string representation of a semantic version to its <see cref="T:ConfigCat.Client.Versioning.SemVersion" /> equivalent.
+            </summary>
+            <param name="version">The version string.</param>
+            <param name="strict">If set to <see langword="true" /> minor and patch version are required,
+            otherwise they are optional.</param>
+            <returns>The <see cref="T:ConfigCat.Client.Versioning.SemVersion" /> object.</returns>
+            <exception cref="T:System.ArgumentNullException">
+                <paramref name="version" /> is <see langword="null" />.</exception>
+            <exception cref="T:System.ArgumentException">
+                <paramref name="version" /> has an invalid format.</exception>
+            <exception cref="T:System.InvalidOperationException">
+                <paramref name="version" /> is missing Minor or Patch versions and <paramref name="strict" /> is <see langword="true" />.</exception>
+            <exception cref="T:System.OverflowException">The Major, Minor, or Patch versions are larger than <code>int.MaxValue</code>.</exception>
+        </member>
+        <member name="M:ConfigCat.Client.Versioning.SemVersion.TryParse(System.String,ConfigCat.Client.Versioning.SemVersion@,System.Boolean)">
+            <summary>
+            Converts the string representation of a semantic version to its <see cref="T:ConfigCat.Client.Versioning.SemVersion" />
+            equivalent and returns a value that indicates whether the conversion succeeded.
+            </summary>
+            <param name="version">The version string.</param>
+            <param name="semver">When the method returns, contains a <see cref="T:ConfigCat.Client.Versioning.SemVersion" /> instance equivalent
+            to the version string passed in, if the version string was valid, or <see langword="null" /> if the
+            version string was not valid.</param>
+            <param name="strict">If set to <see langword="true" /> minor and patch version are required,
+            otherwise they are optional.</param>
+            <returns>
+                <see langword="false" /> when a invalid version string is passed, otherwise <see langword="true" />.</returns>
+        </member>
+        <member name="M:ConfigCat.Client.Versioning.SemVersion.Equals(ConfigCat.Client.Versioning.SemVersion,ConfigCat.Client.Versioning.SemVersion)">
+            <summary>
+            Checks whether two semantic versions are equal.
+            </summary>
+            <param name="versionA">The first version to compare.</param>
+            <param name="versionB">The second version to compare.</param>
+            <returns>
+                <see langword="true" /> if the two values are equal, otherwise <see langword="false" />.</returns>
+        </member>
+        <member name="M:ConfigCat.Client.Versioning.SemVersion.Compare(ConfigCat.Client.Versioning.SemVersion,ConfigCat.Client.Versioning.SemVersion)">
+            <summary>
+            Compares the specified versions.
+            </summary>
+            <param name="versionA">The first version to compare.</param>
+            <param name="versionB">The second version to compare.</param>
+            <returns>A signed number indicating the relative values of <paramref name="versionA" /> and <paramref name="versionB" />.</returns>
+        </member>
+        <member name="M:ConfigCat.Client.Versioning.SemVersion.Change(System.Nullable{System.Int32},System.Nullable{System.Int32},System.Nullable{System.Int32},System.String,System.String)">
+            <summary>
+            Creates a copy of the current instance with changed properties.
+            </summary>
+            <param name="major">The value to replace the major version or <see langword="null" /> to leave it unchanged.</param>
+            <param name="minor">The value to replace the minor version or <see langword="null" /> to leave it unchanged.</param>
+            <param name="patch">The value to replace the patch version or <see langword="null" /> to leave it unchanged.</param>
+            <param name="prerelease">The value to replace the prerelease version or <see langword="null" /> to leave it unchanged.</param>
+            <param name="build">The value to replace the build metadata or <see langword="null" /> to leave it unchanged.</param>
+            <returns>The new version object.</returns>
+            <remarks>
+            The change method is intended to be called using named argument syntax, passing only
+            those fields to be changed.
+            </remarks>
+            <example>
+            To change only the patch version:
+            <code>version.Change(patch: 4)</code></example>
+        </member>
+        <member name="P:ConfigCat.Client.Versioning.SemVersion.Major">
+            <summary>
+            Gets the major version.
+            </summary>
+            <value>
+            The major version.
+            </value>
+        </member>
+        <member name="P:ConfigCat.Client.Versioning.SemVersion.Minor">
+            <summary>
+            Gets the minor version.
+            </summary>
+            <value>
+            The minor version.
+            </value>
+        </member>
+        <member name="P:ConfigCat.Client.Versioning.SemVersion.Patch">
+            <summary>
+            Gets the patch version.
+            </summary>
+            <value>
+            The patch version.
+            </value>
+        </member>
+        <member name="P:ConfigCat.Client.Versioning.SemVersion.Prerelease">
+            <summary>
+            Gets the prerelease version.
+            </summary>
+            <value>
+            The prerelease version. Empty string if this is a release version.
+            </value>
+        </member>
+        <member name="P:ConfigCat.Client.Versioning.SemVersion.Build">
+            <summary>
+            Gets the build metadata.
+            </summary>
+            <value>
+            The build metadata. Empty string if there is no build metadata.
+            </value>
+        </member>
+        <member name="M:ConfigCat.Client.Versioning.SemVersion.ToString">
+            <summary>
+            Returns the <see cref="T:System.String" /> equivalent of this version.
+            </summary>
+            <returns>
+            The <see cref="T:System.String" /> equivalent of this version.
+            </returns>
+        </member>
+        <member name="M:ConfigCat.Client.Versioning.SemVersion.CompareTo(System.Object)">
+            <summary>
+            Compares the current instance with another object of the same type and returns an integer that indicates
+            whether the current instance precedes, follows, or occurs in the same position in the sort order as the
+            other object.
+            </summary>
+            <param name="obj">An object to compare with this instance.</param>
+            <returns>
+            A value that indicates the relative order of the objects being compared.
+            The return value has these meanings:
+             Less than zero: This instance precedes <paramref name="obj" /> in the sort order.
+             Zero: This instance occurs in the same position in the sort order as <paramref name="obj" />.
+             Greater than zero: This instance follows <paramref name="obj" /> in the sort order.
+            </returns>
+            <exception cref="T:System.InvalidCastException">
+                <paramref name="obj" /> is not a <see cref="T:ConfigCat.Client.Versioning.SemVersion" />.</exception>
+        </member>
+        <member name="M:ConfigCat.Client.Versioning.SemVersion.CompareTo(ConfigCat.Client.Versioning.SemVersion)">
+            <summary>
+            Compares the current instance with another object of the same type and returns an integer that indicates
+            whether the current instance precedes, follows, or occurs in the same position in the sort order as the
+            other object.
+            </summary>
+            <param name="other">An object to compare with this instance.</param>
+            <returns>
+            A value that indicates the relative order of the objects being compared.
+            The return value has these meanings:
+             Less than zero: This instance precedes <paramref name="other" /> in the sort order.
+             Zero: This instance occurs in the same position in the sort order as <paramref name="other" />.
+             Greater than zero: This instance follows <paramref name="other" /> in the sort order.
+            </returns>
+        </member>
+        <member name="M:ConfigCat.Client.Versioning.SemVersion.PrecedenceMatches(ConfigCat.Client.Versioning.SemVersion)">
+            <summary>
+            Returns whether two semantic versions have the same precedence. Versions
+            that differ only by build metadata have the same precedence.
+            </summary>
+            <param name="other">The semantic version to compare to.</param>
+            <returns>
+                <see langword="true" /> if the version precedences are equal.</returns>
+        </member>
+        <member name="M:ConfigCat.Client.Versioning.SemVersion.CompareByPrecedence(ConfigCat.Client.Versioning.SemVersion)">
+            <summary>
+            Compares two semantic versions by precedence as defined in the SemVer spec. Versions
+            that differ only by build metadata have the same precedence.
+            </summary>
+            <param name="other">The semantic version.</param>
+            <returns>
+            A value that indicates the relative order of the objects being compared.
+            The return value has these meanings:
+             Less than zero: This instance precedes <paramref name="other" /> in the sort order.
+             Zero: This instance occurs in the same position in the sort order as <paramref name="other" />.
+             Greater than zero: This instance follows <paramref name="other" /> in the sort order.
+            </returns>
+        </member>
+        <member name="M:ConfigCat.Client.Versioning.SemVersion.Equals(System.Object)">
+            <summary>
+            Determines whether the specified <see cref="T:System.Object" /> is equal to this instance.
+            </summary>
+            <param name="obj">The <see cref="T:System.Object" /> to compare with this instance.</param>
+            <returns>
+                <see langword="true" /> if the specified <see cref="T:System.Object" /> is equal to this instance, otherwise <see langword="false" />.
+            </returns>
+        </member>
+        <member name="M:ConfigCat.Client.Versioning.SemVersion.Equals(ConfigCat.Client.Versioning.SemVersion)">
+            <summary>
+            Determines whether the specified <see cref="T:ConfigCat.Client.Versioning.SemVersion" /> is equal to this instance.
+            </summary>
+            <param name="other">The <see cref="T:ConfigCat.Client.Versioning.SemVersion" /> to compare with this instance.</param>
+            <returns>
+                <see langword="true" /> if the specified <see cref="T:ConfigCat.Client.Versioning.SemVersion" /> is equal to this instance, otherwise <see langword="false" />.
+            </returns>
+        </member>
+        <member name="M:ConfigCat.Client.Versioning.SemVersion.GetHashCode">
+            <summary>
+            Returns a hash code for this instance.
+            </summary>
+            <returns>
+            A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
+            </returns>
+        </member>
+        <member name="M:ConfigCat.Client.Versioning.SemVersion.GetObjectData(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            Populates a <see cref="T:System.Runtime.Serialization.SerializationInfo" /> with the data needed to serialize the target object.
+            </summary>
+            <param name="info">The <see cref="T:System.Runtime.Serialization.SerializationInfo" /> to populate with data.</param>
+            <param name="context">The destination (see <see cref="T:System.Runtime.Serialization.SerializationInfo" />) for this serialization.</param>
+        </member>
+        <member name="M:ConfigCat.Client.Versioning.SemVersion.op_Implicit(System.String)~ConfigCat.Client.Versioning.SemVersion">
+            <summary>
+            Implicit conversion from <see cref="T:System.String" /> to <see cref="T:ConfigCat.Client.Versioning.SemVersion" />.
+            </summary>
+            <param name="version">The semantic version.</param>
+            <returns>The <see cref="T:ConfigCat.Client.Versioning.SemVersion" /> object.</returns>
+            <exception cref="T:System.ArgumentNullException">
+                <paramref name="version" /> is <see langword="null" />.</exception>
+            <exception cref="T:System.ArgumentException">The version number has an invalid format.</exception>
+            <exception cref="T:System.OverflowException">The Major, Minor, or Patch versions are larger than <code>int.MaxValue</code>.</exception>
+        </member>
+        <member name="M:ConfigCat.Client.Versioning.SemVersion.op_Equality(ConfigCat.Client.Versioning.SemVersion,ConfigCat.Client.Versioning.SemVersion)">
+            <summary>
+            Compares two semantic versions for equality.
+            </summary>
+            <param name="left">The left value.</param>
+            <param name="right">The right value.</param>
+            <returns>If left is equal to right <see langword="true" />, otherwise <see langword="false" />.</returns>
+        </member>
+        <member name="M:ConfigCat.Client.Versioning.SemVersion.op_Inequality(ConfigCat.Client.Versioning.SemVersion,ConfigCat.Client.Versioning.SemVersion)">
+            <summary>
+            Compares two semantic versions for inequality.
+            </summary>
+            <param name="left">The left value.</param>
+            <param name="right">The right value.</param>
+            <returns>If left is not equal to right <see langword="true" />, otherwise <see langword="false" />.</returns>
+        </member>
+        <member name="M:ConfigCat.Client.Versioning.SemVersion.op_GreaterThan(ConfigCat.Client.Versioning.SemVersion,ConfigCat.Client.Versioning.SemVersion)">
+            <summary>
+            Compares two semantic versions.
+            </summary>
+            <param name="left">The left value.</param>
+            <param name="right">The right value.</param>
+            <returns>If left is greater than right <see langword="true" />, otherwise <see langword="false" />.</returns>
+        </member>
+        <member name="M:ConfigCat.Client.Versioning.SemVersion.op_GreaterThanOrEqual(ConfigCat.Client.Versioning.SemVersion,ConfigCat.Client.Versioning.SemVersion)">
+            <summary>
+            Compares two semantic versions.
+            </summary>
+            <param name="left">The left value.</param>
+            <param name="right">The right value.</param>
+            <returns>If left is greater than or equal to right <see langword="true" />, otherwise <see langword="false" />.</returns>
+        </member>
+        <member name="M:ConfigCat.Client.Versioning.SemVersion.op_LessThan(ConfigCat.Client.Versioning.SemVersion,ConfigCat.Client.Versioning.SemVersion)">
+            <summary>
+            Compares two semantic versions.
+            </summary>
+            <param name="left">The left value.</param>
+            <param name="right">The right value.</param>
+            <returns>If left is less than right <see langword="true" />, otherwise <see langword="false" />.</returns>
+        </member>
+        <member name="M:ConfigCat.Client.Versioning.SemVersion.op_LessThanOrEqual(ConfigCat.Client.Versioning.SemVersion,ConfigCat.Client.Versioning.SemVersion)">
+            <summary>
+            Compares two semantic versions.
+            </summary>
+            <param name="left">The left value.</param>
+            <param name="right">The right value.</param>
+            <returns>If left is less than or equal to right <see langword="true" />, otherwise <see langword="false" />.</returns>
+        </member>
+        <member name="T:System.Runtime.CompilerServices.FormattableStringFactory">
+            <summary>
+            A factory type used by compilers to create instances of the type <see cref="T:System.FormattableString" />.
+            </summary>
+        </member>
+        <member name="M:System.Runtime.CompilerServices.FormattableStringFactory.Create(System.String,System.Object[])">
+            <summary>
+            Create a <see cref="T:System.FormattableString" /> from a composite format string and object
+            array containing zero or more objects to format.
+            </summary>
+        </member>
+        <member name="T:System.Diagnostics.CodeAnalysis.NotNullAttribute">
+            <summary>Specifies that an output will not be null even if the corresponding type allows it. Specifies that an input argument was not null when the call returns.</summary>
+        </member>
+        <member name="T:System.Diagnostics.CodeAnalysis.NotNullWhenAttribute">
+            <summary>Specifies that when a method returns <see cref="P:System.Diagnostics.CodeAnalysis.NotNullWhenAttribute.ReturnValue" />, the parameter will not be null even if the corresponding type allows it.</summary>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.NotNullWhenAttribute.#ctor(System.Boolean)">
+            <summary>Initializes the attribute with the specified return value condition.</summary>
+            <param name="returnValue">
+            The return value condition. If the method returns this value, the associated parameter will not be null.
+            </param>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.NotNullWhenAttribute.ReturnValue">
+            <summary>Gets the return value condition.</summary>
+        </member>
+        <member name="T:System.Diagnostics.CodeAnalysis.MemberNotNullWhenAttribute">
+            <summary>Specifies that the method or property will ensure that the listed field and property members have not-null values when returning with the specified return value condition.</summary>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.MemberNotNullWhenAttribute.#ctor(System.Boolean,System.String)">
+            <summary>Initializes the attribute with the specified return value condition and a field or property member.</summary>
+            <param name="returnValue">
+            The return value condition. If the method returns this value, the associated parameter will not be null.
+            </param>
+            <param name="member">
+            The field or property member that is promised to be not-null.
+            </param>
+        </member>
+        <member name="M:System.Diagnostics.CodeAnalysis.MemberNotNullWhenAttribute.#ctor(System.Boolean,System.String[])">
+            <summary>Initializes the attribute with the specified return value condition and list of field and property members.</summary>
+            <param name="returnValue">
+            The return value condition. If the method returns this value, the associated parameter will not be null.
+            </param>
+            <param name="members">
+            The list of field and property members that are promised to be not-null.
+            </param>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.MemberNotNullWhenAttribute.ReturnValue">
+            <summary>Gets the return value condition.</summary>
+        </member>
+        <member name="P:System.Diagnostics.CodeAnalysis.MemberNotNullWhenAttribute.Members">
+            <summary>Gets field or property member names.</summary>
+        </member>
+    </members>
+</doc>

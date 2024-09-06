@@ -49,6 +49,12 @@ TagManager:
   - 
   - 
   m_SortingLayers:
+  - name: Tile_Mountains
+    uniqueID: 839826695
+    locked: 0
+  - name: Tile_Tower
+    uniqueID: 3000719751
+    locked: 0
   - name: TileBG
     uniqueID: 2507337031
     locked: 0
