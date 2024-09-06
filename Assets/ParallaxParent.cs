@@ -43,11 +43,11 @@ public class ParallaxParent : MonoBehaviour
             }
             if (MovingDown())
             {
-                newMove.y += parallaxMoveSpeed;
+                //newMove.y += parallaxMoveSpeed;
             }
             if (MovingUp())
             {
-                newMove.y -= parallaxMoveSpeed;
+                //newMove.y -= parallaxMoveSpeed;
             }
             pobj.obj.transform.position = newMove;
         }

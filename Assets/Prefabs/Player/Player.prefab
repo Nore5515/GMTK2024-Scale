@@ -461,6 +461,7 @@ MonoBehaviour:
   liverSprite_idle: {fileID: 584743414853009141}
   liverSprite_walk: {fileID: 1708519384852366362}
   legsSprite: {fileID: 9146829585273174099}
+  sprites: []
   speed: 5
   jumpStrength: 8
   swooshie: {fileID: 1319553335112709419, guid: 4c3a7c130a77449138f46d1108616a4f, type: 3}
@@ -486,6 +487,8 @@ MonoBehaviour:
   respawn:
     m_PersistentCalls:
       m_Calls: []
+  movingLeft: 0
+  movingRight: 0
 --- !u!61 &8497186577690607201
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -529,7 +532,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 0.6, y: 0.8}
   m_EdgeRadius: 0
 --- !u!50 &1827918350664454231
 Rigidbody2D:

@@ -92,6 +92,12 @@ public class Player : MonoBehaviour
     public bool movingLeft = false;
     public bool movingRight = false;
 
+    [SerializeField]
+    float heavyJumpModifier = 0.75f;
+
+    [SerializeField]
+    float legsJumpModifier = 1.5f;
+
     bool moving = false;
 
     GameObject checkpoint;
@@ -383,11 +389,11 @@ public class Player : MonoBehaviour
             Vector2 jumpVelo = GetComponent<Rigidbody2D>().velocity;
             if (activeSprite == "legs")
             {
-                jumpVelo.y = jumpStrength * 1.5f;
+                jumpVelo.y = jumpStrength * legsJumpModifier;
             }
             else if (activeSprite == "liver" || activeSprite == "heart")
             {
-                jumpVelo.y = jumpStrength * 0.5f;
+                jumpVelo.y = jumpStrength * heavyJumpModifier;
             }
             else
             {
