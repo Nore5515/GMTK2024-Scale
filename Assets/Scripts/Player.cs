@@ -81,6 +81,12 @@ public class Player : MonoBehaviour
     [Header("Respawning at checkpoint!")]
     public UnityEvent respawn;
 
+    [SerializeField]
+    Vector3 bottomDetect = new Vector3(0.0f, -0.5f, 0.0f);
+
+    [SerializeField]
+    Vector3 topDetect = new Vector3(0.0f, 0.5f, 0.0f);
+
     int hp = 3;
 
     float shakeRadius = 0.0f;
@@ -113,8 +119,11 @@ public class Player : MonoBehaviour
         Debug.Log("Is Debug Enabled: " + stuff);
     }
 
+    Rigidbody2D rb;
+
     void Start()
     {
+        rb = GetComponent<Rigidbody2D>();
         Gmtk2024_analytics.TrackTest();
         StartCoroutine("TestLog");
 
@@ -306,11 +315,18 @@ public class Player : MonoBehaviour
     }
 
 
+    public bool jumpImmunity = false;
 
+    [SerializeField]
+    float ceilingBounceBack = 0.5f;
+
+    [SerializeField]
+    Vector2 veloCopy;
 
     // Update is called once per frame
     void Update()
     {
+        veloCopy = rb.velocity;
         if (poofing)
         {
             if (poofAnim.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).normalizedTime <= 1.0f)
@@ -347,6 +363,105 @@ public class Player : MonoBehaviour
         }
 
         hpText.text = hp.ToString();
+        MovementStateUpdate();
+
+        HandleAnimStateSwitching();
+
+        Vector2 movement = new Vector2();
+        movement.x = Input.GetAxis("Horizontal");
+        if (activeSprite == "liver" || activeSprite == "heart")
+        {
+            transform.Translate(movement * Time.deltaTime * speed * 0.5f);
+        }
+        else
+        {
+            transform.Translate(movement * Time.deltaTime * speed);
+        }
+
+        if (IsHittingHead())
+        {
+            jumpImmunity = false;
+            Vector2 vec = rb.velocity;
+            if (vec.y > 0)
+            {
+                vec.y = -ceilingBounceBack;
+                rb.velocity = vec;
+            }
+        }
+
+        if (IsOnGround())
+        {
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                jumpImmunity = true;
+                Debug.Log("Jump!");
+                HandleJump();
+                rb.gravityScale = 1.0f;
+            }
+            else
+            {
+                if (!jumpImmunity)
+                {
+                    Vector2 vec = rb.velocity;
+                    vec.y = 0.0f;
+                    rb.velocity = Vector2.zero;
+                    rb.angularVelocity = 0.0f;
+                    rb.gravityScale = 0.0f;
+                }
+            }
+        }
+        else
+        {
+            rb.gravityScale = 1.0f;
+            jumpImmunity = false;
+        }
+
+        HandleMorphInput();
+
+        if (Input.GetMouseButtonDown(0))
+        {
+            Click();
+        }
+        Debug.DrawRay(transform.position + bottomDetect + Vector3.left * playerWidth * 0.5f, -Vector3.up * 0.1f, Color.red);
+        Debug.DrawRay(transform.position + bottomDetect + Vector3.right * playerWidth * 0.5f, -Vector3.up * 0.1f, Color.red);
+        Debug.DrawRay(transform.position + topDetect, Vector3.up * 0.1f, Color.red);
+    }
+
+    [SerializeField]
+    float playerWidth = 0.5f;
+
+    //Vector3 bottomLeftDetect = bottomDetect + Vector3.right * 0.5f;
+    //Vector3 bottomRightDetect bottomDetect + Vector3.left* 0.5f;
+
+    bool IsHittingHead()
+    {
+        RaycastHit2D hit = Physics2D.Raycast(transform.position + topDetect, Vector3.up, 0.1f, LayerMask.GetMask("Default"));
+        if (hit.collider != null)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    bool IsOnGround()
+    {
+        if (rb.velocity.y > 0)
+        {
+            return false;
+        }
+        int mask = LayerMask.GetMask("Default");
+        mask = mask | LayerMask.GetMask("Platforms");
+        RaycastHit2D hit1 = Physics2D.Raycast(transform.position + bottomDetect + Vector3.left * playerWidth * 0.5f, -Vector3.up, 0.1f, mask);
+        RaycastHit2D hit2 = Physics2D.Raycast(transform.position + bottomDetect + Vector3.right * playerWidth * 0.5f, -Vector3.up, 0.1f, mask);
+        if (hit1.collider != null || hit2.collider != null)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    void MovementStateUpdate()
+    {
         Vector2 movement = new Vector2();
         movement.x = Input.GetAxis("Horizontal");
         if (movement.x > 0)
@@ -371,74 +486,27 @@ public class Player : MonoBehaviour
             movingLeft = false;
             movingRight = false;
         }
+    }
 
-        HandleAnimStateSwitching();
 
-        //movement.y = Input.GetAxis("Vertical");
-        if (activeSprite == "liver" || activeSprite == "heart")
+    void HandleJump()
+    {
+        Vector2 jumpVelo = rb.velocity;
+        if (activeSprite == "legs")
         {
-            transform.Translate(movement * Time.deltaTime * speed * 0.5f);
+            jumpVelo.y = jumpStrength * legsJumpModifier;
+        }
+        else if (activeSprite == "liver" || activeSprite == "heart")
+        {
+            jumpVelo.y = jumpStrength * heavyJumpModifier;
         }
         else
         {
-            transform.Translate(movement * Time.deltaTime * speed);
+            jumpVelo.y = jumpStrength;
         }
 
-        if (Input.GetKeyDown(KeyCode.Space) && IsOnGround())
-        {
-            Vector2 jumpVelo = GetComponent<Rigidbody2D>().velocity;
-            if (activeSprite == "legs")
-            {
-                jumpVelo.y = jumpStrength * legsJumpModifier;
-            }
-            else if (activeSprite == "liver" || activeSprite == "heart")
-            {
-                jumpVelo.y = jumpStrength * heavyJumpModifier;
-            }
-            else
-            {
-                jumpVelo.y = jumpStrength;
-            }
-
-            GetComponent<Rigidbody2D>().velocity = jumpVelo;
-        }
-
-        HandleMorphInput();
-
-        if (Input.GetMouseButtonDown(0))
-        {
-            Vector3 cursorPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            cursorPosition.z = 0;
-
-            GameObject inst = Instantiate(swooshie);
-            inst.transform.position = transform.position;
-            Vector3 direction = cursorPosition - transform.position;
-
-            direction.Normalize();
-            inst.transform.position += direction;
-
-            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-            inst.transform.rotation = Quaternion.Euler(new Vector3(0.0f, 0.0f, angle));
-        }
-        Debug.DrawRay(transform.position + new Vector3(0.0f, -0.5f, 0.0f), -Vector3.up * 0.1f, Color.red);
-    }
-
-    void HandleAnimStateSwitching()
-    {
-        if (GetSpriteSetByName(activeSprite) != null)
-        {
-            SpriteSet spritesheet = (SpriteSet)GetSpriteSetByName(activeSprite);
-            if (moving)
-            {
-                spritesheet.walk.SetActive(true);
-                spritesheet.idle.SetActive(false);
-            }
-            else
-            {
-                spritesheet.idle.SetActive(true);
-                spritesheet.walk.SetActive(false);
-            }
-        }
+        rb.AddForce(jumpVelo);
+        //rb.velocity = jumpVelo;
     }
 
     void HandleMorphInput()
@@ -469,6 +537,42 @@ public class Player : MonoBehaviour
             }
         }
     }
+
+    void Click()
+    {
+        Vector3 cursorPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        cursorPosition.z = 0;
+
+        GameObject inst = Instantiate(swooshie);
+        inst.transform.position = transform.position;
+        Vector3 direction = cursorPosition - transform.position;
+
+        direction.Normalize();
+        inst.transform.position += direction;
+
+        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+        inst.transform.rotation = Quaternion.Euler(new Vector3(0.0f, 0.0f, angle));
+    }
+
+    void HandleAnimStateSwitching()
+    {
+        if (GetSpriteSetByName(activeSprite) != null)
+        {
+            SpriteSet spritesheet = (SpriteSet)GetSpriteSetByName(activeSprite);
+            if (moving)
+            {
+                spritesheet.walk.SetActive(true);
+                spritesheet.idle.SetActive(false);
+            }
+            else
+            {
+                spritesheet.idle.SetActive(true);
+                spritesheet.walk.SetActive(false);
+            }
+        }
+    }
+
+
 
     IEnumerator PoisonCountdown()
     {
@@ -528,16 +632,6 @@ public class Player : MonoBehaviour
         }
         GameState.hp = hp;
         hpChanged.Invoke();
-    }
-
-    bool IsOnGround()
-    {
-        RaycastHit2D hit = Physics2D.Raycast(transform.position + new Vector3(0.0f, -0.5f, 0.0f), -Vector3.up, 0.1f, LayerMask.GetMask("Default"));
-        if (hit.collider != null)
-        {
-            return true;
-        }
-        return false;
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
