@@ -144,6 +144,157 @@ public class Player : MonoBehaviour
         }
     }
 
+
+
+
+    public bool jumpImmunity = false;
+
+    [SerializeField]
+    float ceilingBounceBack = 0.5f;
+
+    [SerializeField]
+    Vector2 veloCopy;
+
+    [SerializeField]
+    float downGravityBoost = 1.35f;
+
+    // Update is called once per frame
+    void Update()
+    {
+        veloCopy = rb.velocity;
+        if (poofing)
+        {
+            if (poofAnim.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).normalizedTime <= 1.0f)
+            {
+                //Debug.Log("under 1");
+            }
+            else
+            {
+                //Debug.Log("over 1");
+                poofAnim.SetActive(false);
+                poofing = false;
+            }
+        }
+
+        if (shakeRadius > 0.0f)
+        {
+            Vector2 playerPos = new Vector2(transform.position.x, transform.position.y);
+            Vector2 randomPos = Random.insideUnitCircle * shakeRadius + playerPos;
+            Vector3 newCameraPos = new Vector3(randomPos.x, randomPos.y + 1.5f, -10.0f);
+            Camera.main.transform.position = newCameraPos;
+            shakeRadius -= Time.deltaTime * 2.0f;
+        }
+        else
+        {
+            Camera.main.transform.position = new Vector3(transform.position.x, transform.position.y + 1.5f, -10.0f);
+        }
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            GetPoisonedIdiot();
+        }
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            StopPoison();
+        }
+        if (Input.GetKeyDown(KeyCode.S))
+        {
+            StartPlatformImmunity();
+        }
+
+        hpText.text = hp.ToString();
+        MovementStateUpdate();
+
+        HandleAnimStateSwitching();
+
+        Vector2 movement = new Vector2();
+        movement.x = Input.GetAxis("Horizontal");
+        if (activeSprite == "liver" || activeSprite == "heart")
+        {
+            transform.Translate(movement * Time.deltaTime * speed * 0.5f);
+        }
+        else
+        {
+            transform.Translate(movement * Time.deltaTime * speed);
+        }
+
+        if (IsHittingHead())
+        {
+            jumpImmunity = false;
+            Vector2 vec = rb.velocity;
+            if (vec.y > 0)
+            {
+                vec.y = -ceilingBounceBack;
+                rb.velocity = vec;
+            }
+        }
+
+        if (IsOnGround())
+        {
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                jumpImmunity = true;
+                Debug.Log("Jump!");
+                HandleJump();
+                rb.gravityScale = 1.0f;
+            }
+            else
+            {
+                if (!jumpImmunity)
+                {
+                    Vector2 vec = rb.velocity;
+                    vec.y = 0.0f;
+                    rb.velocity = Vector2.zero;
+                    rb.angularVelocity = 0.0f;
+                    rb.gravityScale = 0.0f;
+                }
+            }
+        }
+        else
+        {
+            rb.gravityScale = 1.0f;
+            jumpImmunity = false;
+        }
+
+        HandleMorphInput();
+
+        if (Input.GetMouseButtonDown(0))
+        {
+            Click();
+        }
+        Debug.DrawRay(transform.position + bottomDetect + Vector3.left * playerWidth * 0.5f, -Vector3.up * 0.1f, Color.red);
+        Debug.DrawRay(transform.position + bottomDetect + Vector3.right * playerWidth * 0.5f, -Vector3.up * 0.1f, Color.red);
+        Debug.DrawRay(transform.position + topDetect, Vector3.up * 0.1f, Color.red);
+    }
+
+    public bool platformImmunity = false;
+
+    void StartPlatformImmunity()
+    {
+        if (!platformImmunity)
+        {
+            // immunity on
+            platformImmunity = true;
+            StartCoroutine("StopPlatformImmunity");
+        }
+    }
+
+    [SerializeField]
+    public float platformDowntapImmunityTime = 0.35f;
+
+    IEnumerator StopPlatformImmunity()
+    {
+        yield return new WaitForSeconds(platformDowntapImmunityTime);
+        // immunity off
+        platformImmunity = false;
+    }
+
+
+    [SerializeField]
+    float playerWidth = 0.5f;
+
+    //Vector3 bottomLeftDetect = bottomDetect + Vector3.right * 0.5f;
+    //Vector3 bottomRightDetect bottomDetect + Vector3.left* 0.5f;
+
     void FillSprites()
     {
         for (int x = 0; x < transform.childCount; x++)
@@ -314,125 +465,6 @@ public class Player : MonoBehaviour
         }
     }
 
-
-    public bool jumpImmunity = false;
-
-    [SerializeField]
-    float ceilingBounceBack = 0.5f;
-
-    [SerializeField]
-    Vector2 veloCopy;
-
-    // Update is called once per frame
-    void Update()
-    {
-        veloCopy = rb.velocity;
-        if (poofing)
-        {
-            if (poofAnim.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).normalizedTime <= 1.0f)
-            {
-                //Debug.Log("under 1");
-            }
-            else
-            {
-                //Debug.Log("over 1");
-                poofAnim.SetActive(false);
-                poofing = false;
-            }
-        }
-
-        if (shakeRadius > 0.0f)
-        {
-            Vector2 playerPos = new Vector2(transform.position.x, transform.position.y);
-            Vector2 randomPos = Random.insideUnitCircle * shakeRadius + playerPos;
-            Vector3 newCameraPos = new Vector3(randomPos.x, randomPos.y + 1.5f, -10.0f);
-            Camera.main.transform.position = newCameraPos;
-            shakeRadius -= Time.deltaTime * 2.0f;
-        }
-        else
-        {
-            Camera.main.transform.position = new Vector3(transform.position.x, transform.position.y + 1.5f, -10.0f);
-        }
-        if (Input.GetKeyDown(KeyCode.Q))
-        {
-            GetPoisonedIdiot();
-        }
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            StopPoison();
-        }
-
-        hpText.text = hp.ToString();
-        MovementStateUpdate();
-
-        HandleAnimStateSwitching();
-
-        Vector2 movement = new Vector2();
-        movement.x = Input.GetAxis("Horizontal");
-        if (activeSprite == "liver" || activeSprite == "heart")
-        {
-            transform.Translate(movement * Time.deltaTime * speed * 0.5f);
-        }
-        else
-        {
-            transform.Translate(movement * Time.deltaTime * speed);
-        }
-
-        if (IsHittingHead())
-        {
-            jumpImmunity = false;
-            Vector2 vec = rb.velocity;
-            if (vec.y > 0)
-            {
-                vec.y = -ceilingBounceBack;
-                rb.velocity = vec;
-            }
-        }
-
-        if (IsOnGround())
-        {
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                jumpImmunity = true;
-                Debug.Log("Jump!");
-                HandleJump();
-                rb.gravityScale = 1.0f;
-            }
-            else
-            {
-                if (!jumpImmunity)
-                {
-                    Vector2 vec = rb.velocity;
-                    vec.y = 0.0f;
-                    rb.velocity = Vector2.zero;
-                    rb.angularVelocity = 0.0f;
-                    rb.gravityScale = 0.0f;
-                }
-            }
-        }
-        else
-        {
-            rb.gravityScale = 1.0f;
-            jumpImmunity = false;
-        }
-
-        HandleMorphInput();
-
-        if (Input.GetMouseButtonDown(0))
-        {
-            Click();
-        }
-        Debug.DrawRay(transform.position + bottomDetect + Vector3.left * playerWidth * 0.5f, -Vector3.up * 0.1f, Color.red);
-        Debug.DrawRay(transform.position + bottomDetect + Vector3.right * playerWidth * 0.5f, -Vector3.up * 0.1f, Color.red);
-        Debug.DrawRay(transform.position + topDetect, Vector3.up * 0.1f, Color.red);
-    }
-
-    [SerializeField]
-    float playerWidth = 0.5f;
-
-    //Vector3 bottomLeftDetect = bottomDetect + Vector3.right * 0.5f;
-    //Vector3 bottomRightDetect bottomDetect + Vector3.left* 0.5f;
-
     bool IsHittingHead()
     {
         RaycastHit2D hit = Physics2D.Raycast(transform.position + topDetect, Vector3.up, 0.1f, LayerMask.GetMask("Default"));
@@ -450,7 +482,10 @@ public class Player : MonoBehaviour
             return false;
         }
         int mask = LayerMask.GetMask("Default");
-        mask = mask | LayerMask.GetMask("Platforms");
+        if (!platformImmunity)
+        {
+            mask = mask | LayerMask.GetMask("Platforms");
+        }
         RaycastHit2D hit1 = Physics2D.Raycast(transform.position + bottomDetect + Vector3.left * playerWidth * 0.5f, -Vector3.up, 0.1f, mask);
         RaycastHit2D hit2 = Physics2D.Raycast(transform.position + bottomDetect + Vector3.right * playerWidth * 0.5f, -Vector3.up, 0.1f, mask);
         if (hit1.collider != null || hit2.collider != null)
