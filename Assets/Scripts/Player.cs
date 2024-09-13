@@ -104,6 +104,9 @@ public class Player : MonoBehaviour
     [SerializeField]
     float legsJumpModifier = 1.5f;
 
+    [SerializeField]
+    float heavySpeedModifier = 0.5f;
+
     bool moving = false;
 
     GameObject checkpoint;
@@ -210,7 +213,7 @@ public class Player : MonoBehaviour
         movement.x = Input.GetAxis("Horizontal");
         if (activeSprite == "liver" || activeSprite == "heart")
         {
-            transform.Translate(movement * Time.deltaTime * speed * 0.5f);
+            transform.Translate(movement * Time.deltaTime * speed * heavySpeedModifier);
         }
         else
         {
@@ -225,6 +228,24 @@ public class Player : MonoBehaviour
             {
                 vec.y = -ceilingBounceBack;
                 rb.velocity = vec;
+            }
+        }
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            if (coyoteTime)
+            {
+                Debug.Log("Negating upward");
+                float fallingVec = rb.velocity.y;
+                Vector2 antiGrav = Vector2.up;
+                antiGrav *= Mathf.Abs(fallingVec);
+                rb.AddForce(antiGrav, ForceMode2D.Impulse);
+                jumpImmunity = true;
+                Debug.Log("Jump!");
+                HandleJump();
+                rb.gravityScale = 1.0f;
+                coyoteTime = false;
+                coyoteImmunityOver = true;
             }
         }
 
@@ -248,11 +269,25 @@ public class Player : MonoBehaviour
                     rb.gravityScale = 0.0f;
                 }
             }
+            coyoteTime = false;
+            coyoteImmunityOver = false;
         }
         else
         {
             rb.gravityScale = 1.0f;
             jumpImmunity = false;
+
+            if (!coyoteImmunityOver)
+            {
+                if (!coyoteTime)
+                {
+                    StartCoyoteTime();
+                }
+                else
+                {
+                    // Coyote time!
+                }
+            }
         }
 
         HandleMorphInput();
@@ -264,6 +299,24 @@ public class Player : MonoBehaviour
         Debug.DrawRay(transform.position + bottomDetect + Vector3.left * playerWidth * 0.5f, -Vector3.up * 0.1f, Color.red);
         Debug.DrawRay(transform.position + bottomDetect + Vector3.right * playerWidth * 0.5f, -Vector3.up * 0.1f, Color.red);
         Debug.DrawRay(transform.position + topDetect, Vector3.up * 0.1f, Color.red);
+    }
+
+    public float coyoteSeconds = 0.5f;
+    public bool coyoteTime = false;
+    public bool coyoteImmunityOver = false;
+
+    void StartCoyoteTime()
+    {
+        coyoteTime = true;
+        StartCoroutine("StopCoyoteTime");
+    }
+
+    IEnumerator StopCoyoteTime()
+    {
+        yield return new WaitForSeconds(coyoteSeconds);
+        coyoteTime = false;
+        // you are no longer immune to falling
+        coyoteImmunityOver = true;
     }
 
     public bool platformImmunity = false;

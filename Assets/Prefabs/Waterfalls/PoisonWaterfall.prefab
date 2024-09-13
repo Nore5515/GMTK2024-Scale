@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 937632664049962276}
   - component: {fileID: 5897807760928262762}
   - component: {fileID: 2205130489802483192}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: PoisonWaterfall
   m_TagString: poison_giver
   m_Icon: {fileID: 0}

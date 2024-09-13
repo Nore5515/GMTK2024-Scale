@@ -25,8 +25,8 @@ TagManager:
   - PlayerDetect
   - SwooshieDetect
   - Platforms
-  - 
-  - 
+  - Pickups
+  - WorldObjects
   - 
   - 
   - 

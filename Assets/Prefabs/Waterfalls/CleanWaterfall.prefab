@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 2186574196096056025}
   - component: {fileID: 27439141466537146}
   - component: {fileID: 4347788997499591}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: CleanWaterfall
   m_TagString: poison_remover
   m_Icon: {fileID: 0}

@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3398823340127286250}
   - component: {fileID: 1662408080077977564}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: HeartUnlocker
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -95,7 +95,7 @@ GameObject:
   - component: {fileID: 6524471438827007504}
   - component: {fileID: 7005748029817794814}
   - component: {fileID: 3875601972393724105}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: HeartUnlocker
   m_TagString: ability_unlocker
   m_Icon: {fileID: 0}

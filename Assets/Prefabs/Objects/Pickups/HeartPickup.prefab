@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 335804876742270410}
   - component: {fileID: 2583330012048945849}
   - component: {fileID: 3179801863906117863}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: HeartPickup
   m_TagString: heart_pickup
   m_Icon: {fileID: 0}
@@ -91,6 +91,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5f1f06d36e19f4e0bbf3d61e9c263216, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  maxHP: 0
 --- !u!1 &7176996752111953963
 GameObject:
   m_ObjectHideFlags: 0
@@ -102,7 +103,7 @@ GameObject:
   - component: {fileID: 4108558711514028412}
   - component: {fileID: 7364805837989927153}
   - component: {fileID: 513368481655936737}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: HeartPickupAnim
   m_TagString: Untagged
   m_Icon: {fileID: 0}
