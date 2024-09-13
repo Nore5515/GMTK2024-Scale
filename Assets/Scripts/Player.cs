@@ -520,7 +520,7 @@ public class Player : MonoBehaviour
 
     bool IsHittingHead()
     {
-        RaycastHit2D hit = Physics2D.Raycast(transform.position + topDetect, Vector3.up, 0.1f, LayerMask.GetMask("Default"));
+        RaycastHit2D hit = Physics2D.Raycast(transform.position + topDetect, Vector3.up, 0.1f, LayerMask.GetMask("Terrain"));
         if (hit.collider != null)
         {
             return true;
@@ -534,7 +534,7 @@ public class Player : MonoBehaviour
         {
             return false;
         }
-        int mask = LayerMask.GetMask("Default");
+        int mask = LayerMask.GetMask("Terrain");
         if (!platformImmunity)
         {
             mask = mask | LayerMask.GetMask("Platforms");
