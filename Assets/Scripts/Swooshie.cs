@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class Swooshie : MonoBehaviour
 {
+    public Vector3 playerPos;
+
     void Start()
     {
         //Start the coroutine we define below named DeathWait.
@@ -20,11 +22,16 @@ public class Swooshie : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        Debug.Log("Swooshie trigger entered with " + collision.gameObject.name);
+        if (collision.gameObject.tag == "projectile")
+        {
+            collision.gameObject.GetComponent<Projectile>().TeamFlip(playerPos);
+            //Destroy(collision.gameObject);
+        }
+        //Debug.Log("Swooshie trigger entered with " + collision.gameObject.name);
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        Debug.Log("Swooshie collision entered with " + collision.gameObject.name);
+        //Debug.Log("Swooshie collision entered with " + collision.gameObject.name);
     }
 }

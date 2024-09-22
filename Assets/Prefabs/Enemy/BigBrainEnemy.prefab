@@ -156,6 +156,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isBigEye: 0
   isBigBrain: 1
+  SECONDS_BETWEEN_SHOTS: 0.75
   speed: 5
   sprites:
   - {fileID: 4349796248233323989}
@@ -247,7 +248,7 @@ CircleCollider2D:
     m_Bits: 8
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 247
+    m_Bits: 4087
   m_LayerOverridePriority: 0
   m_ForceSendLayers:
     serializedVersion: 2

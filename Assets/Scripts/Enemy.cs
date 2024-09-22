@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 
 public class Enemy : MonoBehaviour
 {
@@ -9,6 +10,12 @@ public class Enemy : MonoBehaviour
 
     [SerializeField]
     bool isBigBrain = false;
+
+    [Header("Means nothing if not big brain!")]
+    [SerializeField]
+    float SECONDS_BETWEEN_SHOTS = 0.75f;
+
+    float cooldownTime = 0.0f;
 
     bool walkingLeft = true;
 
@@ -22,6 +29,8 @@ public class Enemy : MonoBehaviour
     GameObject bulletPrefab;
 
     Vector3 startPoint;
+
+    List<GameObject> targets = new();
 
     // Start is called before the first frame update
     void Start()
@@ -78,7 +87,18 @@ public class Enemy : MonoBehaviour
         }
         if (isBigBrain)
         {
-
+            if (cooldownTime > 0.0f)
+            {
+                cooldownTime -= Time.deltaTime;
+            }
+            else
+            {
+                if (targets.Count > 0)
+                {
+                    FireAtGameObject(targets[0]);
+                    cooldownTime = SECONDS_BETWEEN_SHOTS;
+                }
+            }
         }
     }
 
@@ -113,7 +133,7 @@ public class Enemy : MonoBehaviour
         return false;
     }
 
-    void FireAtPlayer(GameObject player)
+    void FireAtGameObject(GameObject player)
     {
         GameObject inst = Instantiate(bulletPrefab);
         inst.transform.position = this.transform.position;
@@ -132,7 +152,23 @@ public class Enemy : MonoBehaviour
         }
         else if (collision.gameObject.tag == "player" && isBigBrain)
         {
-            FireAtPlayer(collision.gameObject);
+            targets.Add(collision.gameObject);
+        }
+        else if (collision.gameObject.tag == "projectile")
+        {
+            if (collision.gameObject.GetComponent<Projectile>().playerFlipped)
+            {
+                Destroy(collision.gameObject);
+                gameObject.SetActive(false);
+            }
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (collision.gameObject.tag == "player" && isBigBrain)
+        {
+            targets.Remove(collision.gameObject);
         }
     }
 

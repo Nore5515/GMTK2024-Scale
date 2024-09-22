@@ -661,8 +661,9 @@ public class Player : MonoBehaviour
 
         GameObject inst = Instantiate(swooshie);
         inst.transform.position = transform.position;
-        Vector3 direction = cursorPosition - transform.position;
+        inst.GetComponent<Swooshie>().playerPos = this.transform.position;
 
+        Vector3 direction = cursorPosition - transform.position;
         direction.Normalize();
         inst.transform.position += direction;
 
@@ -777,8 +778,11 @@ public class Player : MonoBehaviour
         }
         else if (collision.gameObject.tag == "projectile")
         {
-            DealDamage(1);
-            Destroy(collision.gameObject);
+            if (!collision.gameObject.GetComponent<Projectile>().playerFlipped)
+            {
+                DealDamage(1);
+                Destroy(collision.gameObject);
+            }
         }
     }
 
