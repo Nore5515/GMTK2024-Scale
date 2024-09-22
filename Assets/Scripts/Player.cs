@@ -29,6 +29,11 @@ public enum MorphTypes
 
 public class Player : MonoBehaviour
 {
+    [SerializeField]
+    float HEAL_RATE_SEC = 1.0f;
+
+    [SerializeField]
+    float MAX_VELO = 100.0f;
 
     [SerializeField]
     GameObject normalSprite_idle;
@@ -173,6 +178,7 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        rb.velocity = Vector3.ClampMagnitude(rb.velocity, MAX_VELO);
         veloCopy = rb.velocity;
         if (poofing)
         {
@@ -721,7 +727,7 @@ public class Player : MonoBehaviour
 
     IEnumerator HealWait()
     {
-        WaitForSeconds wait = new WaitForSeconds(3f);
+        WaitForSeconds wait = new WaitForSeconds(HEAL_RATE_SEC);
 
         while (true)
         {
