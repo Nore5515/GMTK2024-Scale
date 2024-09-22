@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 876a67a2c5b5942e4ba5e2d45e6acbd7
+guid: 558b73955f2f0495fa0d7d9e44de450e
 ScriptedImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -119,18 +119,18 @@ ScriptedImporter:
     tessellationDetail: 0
     uvTransform: {x: 0, y: 0}
   animatedSpriteImportData:
-  - name: Player_eyes_Frame_0
+  - name: EyeUnlocker
     originalName: 
-    pivot: {x: 0.46428573, y: 0}
+    pivot: {x: 0.5, y: 0}
     alignment: 9
     border: {x: 0, y: 0, z: 0, w: 0}
     rect:
       serializedVersion: 2
       x: 4
       y: 4
-      width: 28
+      width: 32
       height: 31
-    spriteID: 7f7dee3d048f7450a90627edc09d3095
+    spriteID: 5eba7f1da949647faa5bead05c1bcede
     spriteBone: []
     spriteOutline: []
     vertices: []
@@ -139,51 +139,23 @@ ScriptedImporter:
     edges: []
     tessellationDetail: 0
     uvTransform: {x: 4, y: 4}
-  - name: Player_eyes_Frame_1
-    originalName: 
-    pivot: {x: 0.46428573, y: 0}
-    alignment: 9
-    border: {x: 0, y: 0, z: 0, w: 0}
-    rect:
-      serializedVersion: 2
-      x: 4
-      y: 43
-      width: 28
-      height: 31
-    spriteID: fefa0b4209c33411c8967deef9df7e80
-    spriteBone: []
-    spriteOutline: []
-    vertices: []
-    spritePhysicsOutline: []
-    indices: 
-    edges: []
-    tessellationDetail: 0
-    uvTransform: {x: 4, y: 43}
   spriteSheetImportData: []
   asepriteLayers:
   - layerIndex: 0
-    guid: 1998693622
-    name: Player_eyes
+    guid: -1779718692
+    name: EyeUnlocker
     layerFlags: 0
     layerType: 0
     blendMode: 0
     cells:
-    - name: Player_eyes_Frame_0
+    - name: EyeUnlocker
       frameIndex: 0
       cellRect:
-        x: 3
+        x: 0
         y: 0
-        width: 28
+        width: 32
         height: 31
-      spriteId: 7f7dee3d048f7450a90627edc09d3095
-    - name: Player_eyes_Frame_1
-      frameIndex: 1
-      cellRect:
-        x: 3
-        y: 0
-        width: 28
-        height: 31
-      spriteId: fefa0b4209c33411c8967deef9df7e80
+      spriteId: 5eba7f1da949647faa5bead05c1bcede
     linkedCells: []
     parentIndex: -1
   platformSettings: []

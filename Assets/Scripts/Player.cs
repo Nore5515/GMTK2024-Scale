@@ -50,6 +50,14 @@ public class Player : MonoBehaviour
     SpriteSet liverSprites;
 
     [SerializeField]
+    GameObject eyesSprite_idle;
+
+    [SerializeField]
+    GameObject eyesSprite_walk;
+
+    SpriteSet eyesSprites;
+
+    [SerializeField]
     GameObject legsSprite;
 
     public List<GameObject> sprites = new();
@@ -132,6 +140,7 @@ public class Player : MonoBehaviour
 
         normalSprites = new SpriteSet(normalSprite_walk, normalSprite_idle);
         liverSprites = new SpriteSet(liverSprite_walk, liverSprite_idle);
+        eyesSprites = new SpriteSet(eyesSprite_walk, eyesSprite_idle);
 
         FillSprites();
 
@@ -427,6 +436,10 @@ public class Player : MonoBehaviour
         {
             return liverSprites;
         }
+        if (name == "eyes")
+        {
+            return eyesSprites;
+        }
         return null;
     }
 
@@ -622,6 +635,15 @@ public class Player : MonoBehaviour
             if (GameState.CheckForm("legs"))
             {
                 SwitchSprite("legs");
+            }
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha5))
+        {
+            Debug.Log("5");
+            if (GameState.CheckForm("eyes"))
+            {
+                Debug.Log("eyes");
+                SwitchSprite("eyes");
             }
         }
     }
