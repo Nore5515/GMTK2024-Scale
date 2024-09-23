@@ -157,6 +157,8 @@ MonoBehaviour:
   isBigEye: 0
   isBigBrain: 1
   SECONDS_BETWEEN_SHOTS: 0.75
+  amp: 1
+  freq: 5
   speed: 5
   sprites:
   - {fileID: 4349796248233323989}

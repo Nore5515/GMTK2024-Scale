@@ -14,6 +14,11 @@ public class Enemy : MonoBehaviour
     [Header("Means nothing if not big brain!")]
     [SerializeField]
     float SECONDS_BETWEEN_SHOTS = 0.75f;
+    [SerializeField]
+    float amp = 1.0f;
+    [SerializeField]
+    float freq = 1.0f;
+    float initialY;
 
     float cooldownTime = 0.0f;
 
@@ -35,6 +40,7 @@ public class Enemy : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        initialY = this.transform.position.y;
         startPoint = transform.position;
     }
 
@@ -87,6 +93,8 @@ public class Enemy : MonoBehaviour
         }
         if (isBigBrain)
         {
+            float sineMove = initialY + Mathf.Sin(Time.time * freq) * amp;
+            transform.position = new Vector3(transform.position.x, sineMove, transform.position.z);
             if (cooldownTime > 0.0f)
             {
                 cooldownTime -= Time.deltaTime;
