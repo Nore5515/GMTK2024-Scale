@@ -9,6 +9,25 @@ public class Enemy : MonoBehaviour
     bool isBigEye = false;
 
     [SerializeField]
+    bool enraged = false;
+
+    [Header("Enraged Big Eyes")]
+    [SerializeField]
+    float enragedSpeed = 7.5f;
+
+    [Header("Enraged Big Brain")]
+    [SerializeField]
+    float enragedFreq = 7.5f;
+    [SerializeField]
+    float enragedAmp = 1.5f;
+    [SerializeField]
+    float enraged_SECONDS_BETWEEN_SHOTS = 0.55f;
+    [SerializeField]
+    float enragedRangeModifier = 1.25f;
+
+    int eyeCollisionMask;
+
+    [SerializeField]
     bool isBigBrain = false;
 
     [Header("Means nothing if not big brain!")]
@@ -17,7 +36,8 @@ public class Enemy : MonoBehaviour
     [SerializeField]
     float amp = 1.0f;
     [SerializeField]
-    float freq = 1.0f;
+    float freq = 5.0f;
+
     float initialY;
 
     float cooldownTime = 0.0f;
@@ -40,6 +60,15 @@ public class Enemy : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        eyeCollisionMask = GenMask();
+        if (enraged)
+        {
+            speed = enragedSpeed;
+            amp = enragedAmp;
+            freq = enragedFreq;
+            SECONDS_BETWEEN_SHOTS = enraged_SECONDS_BETWEEN_SHOTS;
+            GetComponent<CircleCollider2D>().radius *= enragedRangeModifier;
+        }
         initialY = this.transform.position.y;
         startPoint = transform.position;
     }
@@ -69,7 +98,6 @@ public class Enemy : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
         if (isBigEye)
         {
             if (walkingLeft)
@@ -91,7 +119,7 @@ public class Enemy : MonoBehaviour
                 }
             }
         }
-        if (isBigBrain)
+        else if (isBigBrain)
         {
             float sineMove = initialY + Mathf.Sin(Time.time * freq) * amp;
             transform.position = new Vector3(transform.position.x, sineMove, transform.position.z);
@@ -110,12 +138,32 @@ public class Enemy : MonoBehaviour
         }
     }
 
+    int GenMask()
+    {
+        int mask = LayerMask.GetMask("Terrain");
+        mask = mask | LayerMask.GetMask("Player");
+        mask = mask | LayerMask.GetMask("Default");
+        return mask;
+    }
+
     // wall or cliff
     bool IsEdgeLeft()
     {
-        RaycastHit2D hit = Physics2D.Raycast(transform.position + new Vector3(-0.5f, 0.0f, 0.0f), Vector3.left, 0.1f, LayerMask.GetMask("Default"));
+        RaycastHit2D hit = Physics2D.Raycast(transform.position + new Vector3(-0.5f, 0.0f, 0.0f), Vector3.left, 0.1f, eyeCollisionMask);
+        Debug.DrawRay(transform.position + new Vector3(-0.5f, 0.0f, 0.0f), Vector3.left);
         if (hit.collider != null)
         {
+            if (hit.collider.gameObject.tag == "player")
+            {
+                hit.collider.gameObject.GetComponent<Player>().DealDamage(1);
+            }
+            else if (hit.collider.gameObject.tag == "enemy")
+            {
+                if (hit.collider.gameObject.GetComponent<Enemy>().isBigEye == false)
+                {
+                    return false;
+                }
+            }
             return true;
         }
         return false;
@@ -123,9 +171,20 @@ public class Enemy : MonoBehaviour
 
     bool IsEdgeRight()
     {
-        RaycastHit2D hit = Physics2D.Raycast(transform.position + new Vector3(0.5f, 0.0f, 0.0f), Vector3.right, 0.1f, LayerMask.GetMask("Default"));
+        RaycastHit2D hit = Physics2D.Raycast(transform.position + new Vector3(0.5f, 0.0f, 0.0f), Vector3.right, 0.1f, eyeCollisionMask);
         if (hit.collider != null)
         {
+            if (hit.collider.gameObject.tag == "player")
+            {
+                hit.collider.gameObject.GetComponent<Player>().DealDamage(1);
+            }
+            else if (hit.collider.gameObject.tag == "enemy")
+            {
+                if (hit.collider.gameObject.GetComponent<Enemy>().isBigEye == false)
+                {
+                    return false;
+                }
+            }
             return true;
         }
         return false;
@@ -133,7 +192,7 @@ public class Enemy : MonoBehaviour
 
     bool IsOnGround()
     {
-        RaycastHit2D hit = Physics2D.Raycast(transform.position + new Vector3(0.0f, -0.5f, 0.0f), -Vector3.up, 0.1f, LayerMask.GetMask("Default"));
+        RaycastHit2D hit = Physics2D.Raycast(transform.position + new Vector3(0.0f, -0.5f, 0.0f), -Vector3.up, 0.1f, eyeCollisionMask);
         if (hit.collider != null)
         {
             return true;
