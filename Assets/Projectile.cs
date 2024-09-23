@@ -38,6 +38,7 @@ public class Projectile : MonoBehaviour
         dist *= -1.0f;
         dist.Normalize();
         dir = dist;
+        speed *= 1.5f;
         playerFlipped = true;
         sprite.SetActive(false);
         playerFlippedSprite.SetActive(true);

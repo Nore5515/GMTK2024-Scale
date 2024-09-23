@@ -414,6 +414,15 @@ public class Player : MonoBehaviour
             StopPoison();
         }
 
+        if (newSprite == "eyes")
+        {
+            GameState.EyesOpen = true;
+        }
+        else
+        {
+            GameState.EyesOpen = false;
+        }
+
         if (switchedOffLiver && removingPoison)
         {
             //Debug.Log("Tried to sneak off poison ehh?");

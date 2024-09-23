@@ -8,6 +8,8 @@ public static class GameState
 
     public static bool IsPoisoned { get; set; } = false;
 
+    public static bool EyesOpen { get; set; } = false;
+
     public static Dictionary<string, bool> formState = new();
 
     public static void SetFormState(string form, bool newState)
