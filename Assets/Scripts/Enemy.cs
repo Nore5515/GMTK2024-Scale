@@ -149,7 +149,14 @@ public class Enemy : MonoBehaviour
     // wall or cliff
     bool IsEdgeLeft()
     {
-        RaycastHit2D hit = Physics2D.Raycast(transform.position + new Vector3(-0.5f, 0.0f, 0.0f), Vector3.left, 0.1f, eyeCollisionMask);
+        RaycastHit2D hit = Physics2D.Raycast(transform.position + new Vector3(-0.5f, 0.0f, 0.0f), Vector3.left, 0.1f, LayerMask.GetMask("Hidden"));
+        Debug.DrawRay(transform.position + new Vector3(-0.5f, 0.0f, 0.0f), Vector3.left);
+        if (hit.collider != null)
+        {
+            return true;
+        }
+
+        hit = Physics2D.Raycast(transform.position + new Vector3(-0.5f, 0.0f, 0.0f), Vector3.left, 0.1f, eyeCollisionMask);
         Debug.DrawRay(transform.position + new Vector3(-0.5f, 0.0f, 0.0f), Vector3.left);
         if (hit.collider != null)
         {
@@ -171,7 +178,14 @@ public class Enemy : MonoBehaviour
 
     bool IsEdgeRight()
     {
-        RaycastHit2D hit = Physics2D.Raycast(transform.position + new Vector3(0.5f, 0.0f, 0.0f), Vector3.right, 0.1f, eyeCollisionMask);
+        RaycastHit2D hit = Physics2D.Raycast(transform.position + new Vector3(0.5f, 0.0f, 0.0f), Vector3.right, 0.1f, LayerMask.GetMask("Hidden"));
+        Debug.DrawRay(transform.position + new Vector3(0.5f, 0.0f, 0.0f), Vector3.right);
+        if (hit.collider != null)
+        {
+            return true;
+        }
+
+        hit = Physics2D.Raycast(transform.position + new Vector3(0.5f, 0.0f, 0.0f), Vector3.right, 0.1f, eyeCollisionMask);
         if (hit.collider != null)
         {
             if (hit.collider.gameObject.tag == "player")
